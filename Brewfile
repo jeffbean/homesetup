@@ -24,11 +24,15 @@ brew "reattach-to-user-namespace"
 brew "stow"
 # Terminal multiplexer
 brew "tmux"
+# Stacked changes workflow for Git
+brew "git-spice"
 # UNIX shell (command interpreter)
 brew "zsh"
 # Fish shell like syntax highlighting for zsh
 brew "zsh-syntax-highlighting"
 # Move and resize windows using keyboard shortcuts or snap areas
 cask "rectangle"
+# Tap for git-spice
+tap "abhinav/tap"
 vscode "golang.go"
 vscode "ms-vscode.makefile-tools"
