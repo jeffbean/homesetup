@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.homesetup.hidutil</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd "__REPO_ROOT__" &amp;&amp; bash setup/apply-hidutil.sh --apply</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>__REPO_ROOT__/snapshots/logs/hidutil.agent.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__REPO_ROOT__/snapshots/logs/hidutil.agent.err.log</string>
+</dict>
+</plist>
+
