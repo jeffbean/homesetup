@@ -23,7 +23,11 @@ apply:
 	@set -euo pipefail; \
 	if [ -d dotfiles ] && [ "`ls -A dotfiles 2>/dev/null | wc -l`" -gt 0 ]; then \
 	  if command -v stow >/dev/null 2>&1; then \
-	    stow -vt "$$HOME" dotfiles; \
+	    for pkg in dotfiles/*; do \
+	      [ -d "$$pkg" ] || continue; \
+	      echo "Stowing package: $${pkg##*/}"; \
+	      stow -d dotfiles -vt "$$HOME" "$${pkg##*/}"; \
+	    done; \
 	  else \
 	    echo "stow not installed. Install with: brew install stow"; \
 	  fi; \

@@ -20,6 +20,8 @@ brew "jq"
 brew "node"
 # Reattach process (e.g., tmux) to background
 brew "reattach-to-user-namespace"
+# Organize software neatly under a single directory tree (e.g. /usr/local)
+brew "stow"
 # Terminal multiplexer
 brew "tmux"
 # UNIX shell (command interpreter)
