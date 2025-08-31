@@ -23,11 +23,11 @@ BREWFILE="$REPO_ROOT/Brewfile"
 if [[ -f "$BREWFILE" ]]; then
   log "Parsing Brewfile…"
   # formulae
-  sed -nE 's/^\s*brew\s+"([^"]+)".*$/\1/p' "$BREWFILE" | sort -u > "$OUT_DIR/desired_brew_formulae.txt" || true
+  sed -nE 's/^[[:space:]]*brew[[:space:]]+"([^"]+)".*$/\1/p' "$BREWFILE" | sort -u > "$OUT_DIR/desired_brew_formulae.txt" || true
   # casks
-  sed -nE 's/^\s*cask\s+"([^"]+)".*$/\1/p' "$BREWFILE" | sort -u > "$OUT_DIR/desired_brew_casks.txt" || true
+  sed -nE 's/^[[:space:]]*cask[[:space:]]+"([^"]+)".*$/\1/p' "$BREWFILE" | sort -u > "$OUT_DIR/desired_brew_casks.txt" || true
   # mas apps: extract id and name
-  sed -nE 's/^\s*mas\s+"([^"]+)".*,\s*id:\s*([0-9]+).*/\2\t\1/p' "$BREWFILE" | sort -u > "$OUT_DIR/desired_mas_apps.tsv" || true
+  sed -nE 's/^[[:space:]]*mas[[:space:]]+"([^"]+)".*,[[[:space:]]]*id:[[:space:]]*([0-9]+).*/\2\t\1/p' "$BREWFILE" | sort -u > "$OUT_DIR/desired_mas_apps.tsv" || true
 else
   : > "$OUT_DIR/desired_brew_formulae.txt"
   : > "$OUT_DIR/desired_brew_casks.txt"

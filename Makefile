@@ -3,7 +3,8 @@ SHELL := /bin/bash
 .PHONY: help plan diff test apply init update \
         bootstrap apply-dotfiles check fmt snapshot desired diff-dotfiles import import-apply \
         setup-codex setup-codex-apply setup-dev-tools setup-dev-tools-apply setup-assistants setup-assistants-apply \
-        setup-hidutil setup-hidutil-apply setup-hidutil-agent setup-hidutil-agent-remove
+        setup-hidutil setup-hidutil-apply setup-hidutil-agent setup-hidutil-agent-remove \
+        setup-git-spice setup-git-spice-apply
 
 help:
 	@echo "Simple interface:"
@@ -34,6 +35,8 @@ help:
 		@echo "  setup-hidutil-apply    - Apply hidutil keyboard mappings"
 		@echo "  setup-hidutil-agent    - Install/login-load a LaunchAgent to apply hidutil"
 		@echo "  setup-hidutil-agent-remove - Remove the LaunchAgent"
+		@echo "  setup-git-spice        - Dry-run install for git-spice"
+		@echo "  setup-git-spice-apply  - Install git-spice (executes)"
 
 # --- Simple interface ---
 
@@ -189,3 +192,9 @@ setup-hidutil-agent:
 
 setup-hidutil-agent-remove:
 	@bash tools/install_hidutil_agent.sh --remove || true
+
+setup-git-spice:
+	@bash setup/install-git-spice.sh || true
+
+setup-git-spice-apply:
+	@bash setup/install-git-spice.sh --apply || true

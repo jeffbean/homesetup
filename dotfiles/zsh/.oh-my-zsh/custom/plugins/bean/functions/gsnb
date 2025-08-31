@@ -1,0 +1,30 @@
+# gsnb: create a new branch, using git-spice if available, else fallback to git
+# Usage: gsnb <branch-name>
+
+emulate -L zsh
+
+if (( $# == 0 )); then
+  print -ru2 -- "usage: gsnb <branch-name>"
+  return 2
+fi
+
+local branch="$1"
+
+if command -v git >/dev/null 2>&1; then
+  if git spice --help >/dev/null 2>&1; then
+    # Try common git-spice subcommands for creating a branch
+    if git spice help new-branch >/dev/null 2>&1; then
+      git spice new-branch "$branch"
+      return $?
+    elif git spice help new >/dev/null 2>&1; then
+      git spice new "$branch"
+      return $?
+    fi
+  fi
+  # Fallback: create a new git branch locally
+  git checkout -b "$branch"
+else
+  print -ru2 -- "gsnb: git not found on PATH"
+  return 127
+fi
+
