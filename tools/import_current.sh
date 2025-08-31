@@ -6,7 +6,7 @@ set -euo pipefail
 # Use --apply to write into repo files.
 
 usage() {
-  cat <<'USAGE'
+  cat << 'USAGE'
 import_current.sh [--apply] [--pkg NAME]
 
 Actions:
@@ -27,18 +27,30 @@ USAGE
 
 APPLY=false
 PKG="base"
-while (( "$#" )); do
+while (("$#")); do
   case "$1" in
-    --apply) APPLY=true; shift ;;
-    --pkg) PKG="${2:-base}"; shift 2 ;;
-    -h|--help) usage; exit 0 ;;
+    --apply)
+      APPLY=true
+      shift
+      ;;
+    --pkg)
+      PKG="${2:-base}"
+      shift 2
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
     *) shift ;;
   esac
 done
 
-log()   { printf "[+] %s\n" "$*"; }
-warn()  { printf "[!] %s\n" "$*"; }
-error() { printf "[x] %s\n" "$*" >&2; exit 1; }
+log() { printf "[+] %s\n" "$*"; }
+warn() { printf "[!] %s\n" "$*"; }
+error() {
+  printf "[x] %s\n" "$*" >&2
+  exit 1
+}
 
 [[ "$(uname -s)" == "Darwin" ]] || error "This tool targets macOS (Darwin)."
 
@@ -57,14 +69,14 @@ fi
 CUR_SNAP="$REPO_ROOT/snapshots/latest"
 
 # ---------- Brewfile ----------
-if command -v brew >/dev/null 2>&1; then
+if command -v brew > /dev/null 2>&1; then
   log "Generating Brewfile from current system (brew bundle dump)…"
   tmp_brew="$PROPOSED_DIR/Brewfile"
   mkdir -p "$(dirname "$tmp_brew")"
   # Prefer descriptive entries; fall back gracefully if option unsupported
-  brew bundle dump --file "$tmp_brew" --describe --force >/dev/null 2>&1 \
-    || brew bundle dump --file "$tmp_brew" --force >/dev/null 2>&1 \
-    || brew bundle dump --file "$tmp_brew" --force || true
+  brew bundle dump --file "$tmp_brew" --describe --force > /dev/null 2>&1 ||
+    brew bundle dump --file "$tmp_brew" --force > /dev/null 2>&1 ||
+    brew bundle dump --file "$tmp_brew" --force || true
   if [[ "$APPLY" == "true" ]]; then
     log "Writing Brewfile to repo root."
     cp "$tmp_brew" "$REPO_ROOT/Brewfile"
@@ -79,7 +91,7 @@ fi
 CUR_DEFAULTS="$CUR_SNAP/defaults_values.txt"
 gen_defaults() {
   local out="$1"
-  cat > "$out" <<'HDR'
+  cat > "$out" << 'HDR'
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -125,7 +137,7 @@ HDR
     low=$(echo "$val" | tr '[:upper:]' '[:lower:]')
     if [[ "$low" == "true" || "$low" == "false" || "$val" == "1" || "$val" == "0" ]]; then
       # normalize to true/false
-      case "$val" in 1) val=true;; 0) val=false;; esac
+      case "$val" in 1) val=true ;; 0) val=false ;; esac
       echo "run \"defaults write $domain $key -bool $val\"" >> "$out"
     elif [[ "$val" =~ ^-?[0-9]+$ ]]; then
       echo "run \"defaults write $domain $key -int $val\"" >> "$out"
@@ -161,7 +173,7 @@ CONF_FILE="$REPO_ROOT/config/dotfiles_paths.txt"
 if [[ ! -f "$CONF_FILE" ]]; then
   log "Creating template config/dotfiles_paths.txt (edit to include files to import)."
   mkdir -p "$REPO_ROOT/config"
-  cat > "$CONF_FILE" <<'TPL'
+  cat > "$CONF_FILE" << 'TPL'
 # List paths relative to $HOME to import into dotfiles/<pkg>/
 # Examples:
 # .zshrc
@@ -176,8 +188,8 @@ copy_in() {
   local dest="$dest_root/$src"
   mkdir -p "$(dirname "$dest")"
   # Prefer rsync if available for robust copy; fall back to cp -RL
-  if command -v rsync >/dev/null 2>&1; then
-    rsync -aL --exclude ".DS_Store" "$HOME/$src" "$dest" 2>/dev/null || rsync -aL --exclude ".DS_Store" "$HOME/$src" "$dest_root/"
+  if command -v rsync > /dev/null 2>&1; then
+    rsync -aL --exclude ".DS_Store" "$HOME/$src" "$dest" 2> /dev/null || rsync -aL --exclude ".DS_Store" "$HOME/$src" "$dest_root/"
   else
     if [[ -d "$HOME/$src" ]]; then
       cp -RL "$HOME/$src" "$dest_root/$src"
@@ -194,7 +206,8 @@ while IFS= read -r line; do
   # strip comments/whitespace
   line="${line%%#*}"
   line="${line%%$'\r'}"
-  line="${line## }"; line="${line%% }"
+  line="${line## }"
+  line="${line%% }"
   [[ -z "$line" ]] && continue
   if [[ -e "$HOME/$line" ]]; then
     log "Importing $HOME/$line -> dotfiles/$PKG/$line"
@@ -208,7 +221,7 @@ while IFS= read -r line; do
         cp -L "$HOME/$line" "$PROPOSED_DIR/dotfiles/$PKG/$line"
       fi
     fi
-    imported=$((imported+1))
+    imported=$((imported + 1))
   else
     warn "Path not found in HOME: $line"
   fi

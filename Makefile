@@ -1,25 +1,114 @@
 SHELL := /bin/bash
 
-.PHONY: help bootstrap apply check fmt test snapshot desired diff diff-dotfiles import import-apply
+.PHONY: help plan diff test apply init update \
+        bootstrap apply-dotfiles check fmt snapshot desired diff-dotfiles import import-apply \
+        setup-codex setup-codex-apply setup-dev-tools setup-dev-tools-apply setup-assistants setup-assistants-apply \
+        setup-hidutil setup-hidutil-apply setup-hidutil-agent setup-hidutil-agent-remove
 
 help:
-	@echo "Common targets:"
+	@echo "Simple interface:"
+	@echo "  plan       - Preview what apply would do (dry-run)"
+	@echo "  diff       - Compute current vs desired state and report"
+	@echo "  test       - Lint and run tests"
+	@echo "  apply      - Apply desired state (brew bundle, defaults, dotfiles)"
+	@echo "  init       - First-time setup on a new machine (everything)"
+	@echo "  update     - Re-apply and update everything"
+	@echo ""
+	@echo "Other targets:"
 	@echo "  bootstrap  - Install Homebrew, brew bundle, run defaults"
-	@echo "  apply      - Link dotfiles to $$HOME (via stow)"
+	@echo "  apply-dotfiles - Link dotfiles to $$HOME (via stow)"
 	@echo "  check      - Run linters and static checks"
 	@echo "  fmt        - Apply formatters"
-	@echo "  test       - Run tests (bats)"
 	@echo "  snapshot   - Capture current system state into snapshots/"
-	@echo "  desired    - Generate desired state from repo into snapshots/desired/"
-	@echo "  diff       - Compare snapshots/latest vs desired/latest and write report"
+	@echo "  desired    - Generate desired state to snapshots/desired/"
 	@echo "  diff-dotfiles - Unified diff between dotfiles/ and $${HOME}"
 	@echo "  import     - Propose updates from current system into repo"
 	@echo "  import-apply - Apply updates from current system into repo"
+	@echo "  setup-codex - Dry-run install steps for Codex CLI"
+	@echo "  setup-codex-apply - Install Codex CLI (executes commands)"
+	@echo "  setup-dev-tools - Dry-run install for linters/tests"
+	@echo "  setup-dev-tools-apply - Install linters/tests (executes)"
+		@echo "  setup-assistants - Dry-run install for Codex + Claude"
+		@echo "  setup-assistants-apply - Install Codex + Claude (executes)"
+		@echo "  setup-hidutil          - Preview applying hidutil keyboard mappings"
+		@echo "  setup-hidutil-apply    - Apply hidutil keyboard mappings"
+		@echo "  setup-hidutil-agent    - Install/login-load a LaunchAgent to apply hidutil"
+		@echo "  setup-hidutil-agent-remove - Remove the LaunchAgent"
+
+# --- Simple interface ---
+
+plan:
+	@bash tools/plan.sh
+
+diff: desired snapshot
+	@bash tools/diff_state.sh
+
+test:
+	@$(MAKE) check
+	@set -e; \
+	if command -v bats >/dev/null 2>&1; then \
+	  bats tests; \
+	else echo "bats not installed (brew install bats-core)"; fi
+
+# Apply desired state: Homebrew bundle + macOS defaults + dotfiles
+apply:
+	@echo "[+] Applying desired state…"
+	@bash setup/bootstrap_macos.sh
+	@$(MAKE) apply-dotfiles
+	@# Optional assistants install if requested: ASSISTANTS=1 make apply
+	@if [ "$$ASSISTANTS" = "1" ] || [ "$$ASSISTANTS" = "true" ]; then \
+	  bash setup/install-assistants.sh --apply || true; \
+	fi
+	@echo "[+] Apply complete."
+
+# Initial setup: everything end-to-end.
+# Flags:
+#   SKIP_DEV=1        Skip installing dev tools
+#   SKIP_ASSISTANTS=1 Skip installing Codex/Claude
+#   BACKUP_CONFLICTS=0 Do not backup conflicting files before stow
+init:
+	@echo "[+] Initial setup (inclusive)…"
+	@bash setup/bootstrap_macos.sh --yes || true
+	@# Optionally backup conflicting files before linking dotfiles
+	@if [ "$$BACKUP_CONFLICTS" != "0" ]; then \
+	  bash tools/prepare_apply.sh || true; \
+	fi
+	@$(MAKE) apply-dotfiles
+	@if [ "$$SKIP_DEV" != "1" ]; then \
+	  bash setup/install-dev-tools.sh --apply || true; \
+	fi
+	@if [ "$$SKIP_ASSISTANTS" != "1" ]; then \
+	  bash setup/install-assistants.sh --apply || true; \
+	fi
+	@$(MAKE) snapshot
+	@echo "[+] Initial setup complete."
+
+# Update flow: re-apply everything idempotently.
+# Flags mirror init: SKIP_DEV, SKIP_ASSISTANTS, BACKUP_CONFLICTS
+update:
+	@echo "[+] Update (inclusive)…"
+	@$(MAKE) plan
+	@bash setup/bootstrap_macos.sh --yes || true
+	@if [ "$$BACKUP_CONFLICTS" = "1" ]; then \
+	  bash tools/prepare_apply.sh || true; \
+	fi
+	@$(MAKE) apply-dotfiles
+	@if [ "$$SKIP_DEV" != "1" ]; then \
+	  bash setup/install-dev-tools.sh --apply || true; \
+	fi
+	@if [ "$$SKIP_ASSISTANTS" != "1" ]; then \
+	  bash setup/install-assistants.sh --apply || true; \
+	fi
+	@$(MAKE) diff
+	@$(MAKE) test
+	@echo "[+] Update complete."
 
 bootstrap:
 	@bash setup/bootstrap_macos.sh
 
-apply:
+
+# Link dotfiles only (idempotent)
+apply-dotfiles:
 	@set -euo pipefail; \
 	if [ -d dotfiles ] && [ "`ls -A dotfiles 2>/dev/null | wc -l`" -gt 0 ]; then \
 	  if command -v stow >/dev/null 2>&1; then \
@@ -38,10 +127,10 @@ apply:
 check:
 	@set -e; \
 	if command -v shellcheck >/dev/null 2>&1; then \
-	  shellcheck -x setup/*.sh 2>/dev/null || true; \
+	  shellcheck -x setup/*.sh tools/*.sh 2>/dev/null || true; \
 	else echo "shellcheck not installed (brew install shellcheck)"; fi; \
 	if command -v shfmt >/dev/null 2>&1; then \
-	  shfmt -d -i 2 -ci -sr . || true; \
+	  while IFS= read -r -d '' f; do shfmt -d -i 2 -ci -sr "$${f}" || true; done < <(find setup tools -type f -name '*.sh' -print0); \
 	else echo "shfmt not installed (brew install shfmt)"; fi; \
 	if command -v yamllint >/dev/null 2>&1; then \
 	  yamllint -s . || true; \
@@ -50,26 +139,17 @@ check:
 fmt:
 	@set -e; \
 	if command -v shfmt >/dev/null 2>&1; then \
-	  shfmt -w -i 2 -ci -sr setup; \
+	  shfmt -w -i 2 -ci -sr setup tools; \
 	fi; \
 	if command -v prettier >/dev/null 2>&1; then \
 	  prettier -w "**/*.{yml,yaml,json,md}" || true; \
 	fi
-
-test:
-	@set -e; \
-	if command -v bats >/dev/null 2>&1; then \
-	  bats tests; \
-	else echo "bats not installed (brew install bats-core)"; fi
 
 snapshot:
 	@bash tools/snapshot_current.sh
 
 desired:
 	@bash tools/generate_desired.sh
-
-diff: desired snapshot
-	@bash tools/diff_state.sh
 
 diff-dotfiles:
 	@bash tools/diff_dotfiles.sh
@@ -79,3 +159,33 @@ import:
 
 import-apply:
 	@bash tools/import_current.sh --apply
+
+setup-codex:
+	@bash setup/install-codex.sh
+
+setup-codex-apply:
+	@bash setup/install-codex.sh --apply --method auto
+
+setup-dev-tools:
+	@bash setup/install-dev-tools.sh
+
+setup-dev-tools-apply:
+	@bash setup/install-dev-tools.sh --apply
+
+setup-assistants:
+	@bash setup/install-assistants.sh
+
+setup-assistants-apply:
+	@bash setup/install-assistants.sh --apply
+
+setup-hidutil:
+	@bash setup/apply-hidutil.sh || true
+
+setup-hidutil-apply:
+	@bash setup/apply-hidutil.sh --apply || true
+
+setup-hidutil-agent:
+	@bash tools/install_hidutil_agent.sh || true
+
+setup-hidutil-agent-remove:
+	@bash tools/install_hidutil_agent.sh --remove || true

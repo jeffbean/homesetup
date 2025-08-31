@@ -27,4 +27,3 @@ for pkg in "$DOT_ROOT"/*; do
 done
 
 echo "[+] Backup complete. You can restore by moving *.backup.$TS back."
-

@@ -3,8 +3,11 @@ set -euo pipefail
 
 # Generate desired state from this repo: Brewfile, defaults, and dotfiles.
 
-log()   { printf "[+] %s\n" "$*"; }
-error() { printf "[x] %s\n" "$*" >&2; exit 1; }
+log() { printf "[+] %s\n" "$*"; }
+error() {
+  printf "[x] %s\n" "$*" >&2
+  exit 1
+}
 
 [[ "$(uname -s)" == "Darwin" ]] || error "This tool targets macOS (Darwin)."
 
@@ -37,40 +40,41 @@ DESIRED_DEFAULTS="$OUT_DIR/defaults_desired.tsv"
 if [[ -f "$DEFAULTS_SCRIPT" ]]; then
   log "Extracting desired macOS defaults…"
   # Extract the actual defaults command from lines like: run "defaults write …" or plain defaults lines
-  { \
-    sed -nE 's/^[[:space:]]*run[[:space:]]*"([^"]*)".*/\1/p' "$DEFAULTS_SCRIPT"; \
-    sed -nE '/^[[:space:]]*defaults[[:space:]]+(-currentHost[[:space:]]+)?write[[:space:]]+/p' "$DEFAULTS_SCRIPT"; \
-  } | \
-  while IFS= read -r cmd; do
-    # tokenize
-    read -r -a toks <<< "$cmd"
-    # toks[0]=defaults
-    idx=1
-    currentHost="false"
-    if [[ "${toks[$idx]:-}" == "-currentHost" ]]; then
-      currentHost="true"; ((idx++))
-    fi
-    [[ "${toks[$idx]:-}" == "write" ]] || continue
-    ((idx++))
-    domain="${toks[$idx]:-}"; ((idx++))
-    key="${toks[$idx]:-}"; ((idx++))
-    type="${toks[$idx]:-}"
-    value=""
-    if [[ "$type" =~ ^-(bool|int|float|string)$ ]]; then
+  {
+    sed -nE 's/^[[:space:]]*run[[:space:]]*"([^"]*)".*/\1/p' "$DEFAULTS_SCRIPT"
+    sed -nE '/^[[:space:]]*defaults[[:space:]]+(-currentHost[[:space:]]+)?write[[:space:]]+/p' "$DEFAULTS_SCRIPT"
+  } |
+    while IFS= read -r cmd; do
+      # tokenize
+      read -r -a toks <<< "$cmd"
+      # toks[0]=defaults
+      idx=1
+      if [[ "${toks[$idx]:-}" == "-currentHost" ]]; then
+        ((idx++))
+      fi
+      [[ "${toks[$idx]:-}" == "write" ]] || continue
       ((idx++))
-      value="${toks[$idx]:-}"
-      # normalize value by type
-      case "$type" in
-        -bool) value=$(echo "$value" | tr '[:upper:]' '[:lower:]');;
-        -int|-float|-string) : ;; # keep as-is
-      esac
-    else
-      # no explicit type; capture remainder as value string
-      rest=("${toks[@]:$idx}")
-      value="${rest[*]}"
-    fi
-    printf "%s\t%s\t%s\t%s\n" "$domain" "$key" "$type" "$value"
-  done | sort -u > "$DESIRED_DEFAULTS"
+      domain="${toks[$idx]:-}"
+      ((idx++))
+      key="${toks[$idx]:-}"
+      ((idx++))
+      type="${toks[$idx]:-}"
+      value=""
+      if [[ "$type" =~ ^-(bool|int|float|string)$ ]]; then
+        ((idx++))
+        value="${toks[$idx]:-}"
+        # normalize value by type
+        case "$type" in
+          -bool) value=$(echo "$value" | tr '[:upper:]' '[:lower:]') ;;
+          -int | -float | -string) : ;; # keep as-is
+        esac
+      else
+        # no explicit type; capture remainder as value string
+        rest=("${toks[@]:$idx}")
+        value="${rest[*]}"
+      fi
+      printf "%s\t%s\t%s\t%s\n" "$domain" "$key" "$type" "$value"
+    done | sort -u > "$DESIRED_DEFAULTS"
 else
   : > "$DESIRED_DEFAULTS"
 fi
