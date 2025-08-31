@@ -50,7 +50,7 @@ test:
 	@$(MAKE) check
 	@set -e; \
 	if command -v bats >/dev/null 2>&1; then \
-	  bats tests; \
+	  bats -r tests; \
 	else echo "bats not installed (brew install bats-core)"; fi
 
 # Apply desired state: Homebrew bundle + macOS defaults + dotfiles
