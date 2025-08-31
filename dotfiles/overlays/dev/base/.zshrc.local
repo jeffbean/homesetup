@@ -1,0 +1,8 @@
+# Dev profile overlay: extra zsh options/aliases here
+# This file overlays base/.zshrc when dev profile is active and apply-dotfiles runs.
+
+# Example: enable auto-cd and extended glob
+setopt autocd extended_glob
+
+# Example alias
+alias k='kubectl'

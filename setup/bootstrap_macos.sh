@@ -31,6 +31,12 @@ Flags:
 USAGE
 }
 
+# Load active profile if present (PROMPT_FLAVOR, HS_PROFILE, etc.)
+if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
+  # shellcheck disable=SC1090
+  source "$HOME/.config/homesetup/profile.env"
+fi
+
 AUTO_YES=false
 DO_BUNDLE=true
 DO_DEFAULTS=true
@@ -79,14 +85,25 @@ fi
 if [[ "$DO_BUNDLE" == "true" ]]; then
   if [[ -f Brewfile ]]; then
     log "Applying Brewfile (brew bundle)…"
-    # Preview/check, then install without upgrading. Capture verbose logs to snapshots/logs.
+    # Compose Brewfile with profile extras if available
+    COMPOSED_BREWFILE="Brewfile"
+    if [[ -n "${HS_PROFILE:-}" && -f "config/profiles/${HS_PROFILE}/Brewfile.extra" ]]; then
+      COMPOSED_BREWFILE="snapshots/logs/Brewfile.composed.$(date +%Y%m%d-%H%M%S)"
+      mkdir -p "snapshots/logs"
+      {
+        cat Brewfile
+        echo "\n# --- Profile: ${HS_PROFILE} extras ---"
+        cat "config/profiles/${HS_PROFILE}/Brewfile.extra"
+      } > "$COMPOSED_BREWFILE"
+    fi
+    # Preview/check, then install without upgrading. Capture verbose logs.
     TS="$(date +%Y%m%d-%H%M%S)"
     LOG_DIR="snapshots/logs"
     mkdir -p "$LOG_DIR"
     CHECK_LOG="$LOG_DIR/brew_bundle_check.$TS.log"
     APPLY_LOG="$LOG_DIR/brew_bundle_apply.$TS.log"
-    brew bundle check --file=Brewfile > "$CHECK_LOG" 2>&1 || true
-    HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file=Brewfile --no-upgrade > "$APPLY_LOG" 2>&1 || warn "brew bundle encountered issues. See $APPLY_LOG"
+    brew bundle check --file="$COMPOSED_BREWFILE" > "$CHECK_LOG" 2>&1 || true
+    HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file="$COMPOSED_BREWFILE" --no-upgrade > "$APPLY_LOG" 2>&1 || warn "brew bundle encountered issues. See $APPLY_LOG"
   else
     warn "Brewfile not found. Create one at repo root."
   fi

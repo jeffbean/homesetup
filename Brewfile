@@ -30,6 +30,10 @@ brew "git-spice"
 brew "zsh"
 # Fish shell like syntax highlighting for zsh
 brew "zsh-syntax-highlighting"
+# Prompt: Starship (optional via profile)
+brew "starship"
+# Nerd Font for better glyphs in terminal prompt
+cask "font-jetbrains-mono-nerd-font"
 # Move and resize windows using keyboard shortcuts or snap areas
 cask "rectangle"
 # Tap for git-spice

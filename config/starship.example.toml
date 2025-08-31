@@ -1,0 +1,26 @@
+# Example Starship configuration
+
+add_newline = false
+format = "$all"
+
+[character]
+success_symbol = "➜"
+error_symbol = "✗"
+
+[directory]
+truncate_to_repo = true
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = " "
+truncation_length = 32
+
+[git_status]
+conflicted = "≠"
+ahead = "⇡"
+behind = "⇣"
+modified = "*"
+staged = "+"
+stashed = "≡"
+untracked = "?"
+

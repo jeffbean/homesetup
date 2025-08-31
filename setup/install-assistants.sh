@@ -31,6 +31,16 @@ Examples:
 USAGE
 }
 
+# Load active profile + profile-specific assistants env (so profiles can toggle installs)
+if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
+  # shellcheck disable=SC1090
+  source "$HOME/.config/homesetup/profile.env"
+fi
+if [[ -n "${HS_PROFILE:-}" && -r "$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)/config/profiles/${HS_PROFILE}/assistants.env" ]]; then
+  # shellcheck disable=SC1090
+  source "$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)/config/profiles/${HS_PROFILE}/assistants.env"
+fi
+
 log() { printf "[+] %s\n" "$*"; }
 warn() { printf "[!] %s\n" "$*"; }
 die() {

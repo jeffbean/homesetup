@@ -50,18 +50,23 @@ if command -v git >/dev/null 2>&1 && git spice --version >/dev/null 2>&1; then
 fi
 
 if command -v brew >/dev/null 2>&1; then
-  # Probe if a formula/cask exists
+  # Prefer official tap per upstream docs
+  if ! brew tap | grep -q "^abhinav/tap$"; then
+    log "Adding tap: abhinav/tap"
+    run "brew tap abhinav/tap"
+  fi
+  if brew info abhinav/tap/git-spice >/dev/null 2>&1; then
+    log "Installing via Homebrew: abhinav/tap/git-spice"
+    run "brew install abhinav/tap/git-spice"
+    exit 0
+  fi
+  # Fallback search if tap not available
   if brew search --formula --exact git-spice >/dev/null 2>&1; then
     log "Installing via Homebrew formula: git-spice"
     run "brew install git-spice"
     exit 0
   fi
-  if brew search --cask --exact git-spice >/dev/null 2>&1; then
-    log "Installing via Homebrew cask: git-spice"
-    run "brew install --cask git-spice"
-    exit 0
-  fi
-  warn "No git-spice formula/cask found."
+  warn "git-spice not found in Homebrew taps or core."
 else
   warn "Homebrew not available."
 fi
@@ -76,4 +81,3 @@ Once installed, open a new shell to pick up the binary on PATH.
 MSG
 
 exit 0
-

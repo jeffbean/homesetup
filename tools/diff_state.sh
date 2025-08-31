@@ -28,6 +28,13 @@ section() {
 }
 
 echo "macOS setup diff report" > "$REPORT"
+if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
+  # shellcheck disable=SC1090
+  source "$HOME/.config/homesetup/profile.env"
+fi
+if [[ -n "${HS_PROFILE:-}" ]]; then
+  echo "Profile: $HS_PROFILE" >> "$REPORT"
+fi
 echo "Current: $CUR_DIR" >> "$REPORT"
 echo "Desired: $DES_DIR" >> "$REPORT"
 

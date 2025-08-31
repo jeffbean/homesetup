@@ -4,7 +4,7 @@ SHELL := /bin/bash
         bootstrap apply-dotfiles check fmt snapshot desired diff-dotfiles import import-apply \
         setup-codex setup-codex-apply setup-dev-tools setup-dev-tools-apply setup-assistants setup-assistants-apply \
         setup-hidutil setup-hidutil-apply setup-hidutil-agent setup-hidutil-agent-remove \
-        setup-git-spice setup-git-spice-apply
+        setup-git-spice setup-git-spice-apply prune-snapshots diff-open profile
 
 help:
 	@echo "Simple interface:"
@@ -37,6 +37,9 @@ help:
 		@echo "  setup-hidutil-agent-remove - Remove the LaunchAgent"
 		@echo "  setup-git-spice        - Dry-run install for git-spice"
 		@echo "  setup-git-spice-apply  - Install git-spice (executes)"
+		@echo "  prune-snapshots        - Dry-run prune to keep last N snapshots (KEEP=N)"
+		@echo "  diff-open              - Open latest diff report in default viewer"
+		@echo "  profile PROFILE=<name> - Activate a profile and apply setup"
 
 # --- Simple interface ---
 
@@ -113,6 +116,8 @@ bootstrap:
 # Link dotfiles only (idempotent)
 apply-dotfiles:
 	@set -euo pipefail; \
+	# Load active profile if present
+	if [ -r "$$HOME/.config/homesetup/profile.env" ]; then . "$$HOME/.config/homesetup/profile.env"; fi; \
 	if [ -d dotfiles ] && [ "`ls -A dotfiles 2>/dev/null | wc -l`" -gt 0 ]; then \
 	  if command -v stow >/dev/null 2>&1; then \
 	    for pkg in dotfiles/*; do \
@@ -120,6 +125,13 @@ apply-dotfiles:
 	      echo "Stowing package: $${pkg##*/}"; \
 	      stow -d dotfiles -vt "$$HOME" "$${pkg##*/}"; \
 	    done; \
+	    if [ -n "$$HS_PROFILE" ] && [ -d "dotfiles/overlays/$$HS_PROFILE" ]; then \
+	      for pkg in dotfiles/overlays/$$HS_PROFILE/*; do \
+	        [ -d "$$pkg" ] || continue; \
+	        echo "Stowing overlay ($$HS_PROFILE): $${pkg##*/}"; \
+	        stow -d "dotfiles/overlays/$$HS_PROFILE" -vt "$$HOME" "$${pkg##*/}"; \
+	      done; \
+	    fi; \
 	  else \
 	    echo "stow not installed. Install with: brew install stow"; \
 	  fi; \
@@ -156,6 +168,19 @@ desired:
 
 diff-dotfiles:
 	@bash tools/diff_dotfiles.sh
+
+prune-snapshots:
+	@bash tools/prune_snapshots.sh ${KEEP:+--keep ${KEEP}}
+
+diff-open:
+	@open snapshots/diff/latest/report.md || true
+
+# Activate a profile and apply the full setup
+profile:
+	@if [ -z "$(PROFILE)" ]; then echo "Usage: make profile PROFILE=<name>"; exit 2; fi
+	@bash tools/profile.sh activate "$(PROFILE)" --apply
+	@echo "[+] Profile activated: $(PROFILE)"
+	@$(MAKE) apply
 
 import:
 	@bash tools/import_current.sh

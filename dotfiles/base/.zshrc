@@ -4,6 +4,12 @@
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+# Load homesetup profile early so we can choose OMZ vs Starship stack
+if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
+  # shellcheck disable=SC1090
+  source "$HOME/.config/homesetup/profile.env"
+fi
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -72,7 +78,20 @@ ZSH_THEME="bean-headline"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git autojump bean)
 
-source $ZSH/oh-my-zsh.sh
+# Choose shell stack: omz (Oh My Zsh) or starship-only via profile
+if [[ "${SHELL_STACK:-omz}" == "omz" ]]; then
+  source $ZSH/oh-my-zsh.sh
+else
+  # Minimal loader for bean plugin without OMZ
+  _BEAN_DIR="$HOME/.oh-my-zsh/custom/plugins/bean"
+  if [[ -d "$_BEAN_DIR" ]]; then
+    for f in "$_BEAN_DIR"/scripts/*.zsh; do [[ -r "$f" ]] && source "$f"; done
+    if [[ -d "$_BEAN_DIR/functions" ]]; then
+      fpath=("$_BEAN_DIR/functions" $fpath)
+      for f in "$_BEAN_DIR"/functions/*(:t); do autoload -Uz "$f"; done
+    fi
+  fi
+fi
 
 # User configuration
 
