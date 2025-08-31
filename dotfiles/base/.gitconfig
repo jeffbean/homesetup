@@ -1,0 +1,11 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[user]
+	name = Jeffrey Bean
+	email = jeffbean@users.noreply.github.com
+
+[includeIf "gitdir:~/"]
+    path = ~/.bean_gitconfig

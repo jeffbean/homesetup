@@ -1,0 +1,11 @@
+# List paths relative to $HOME to import into dotfiles/<pkg>/
+# Examples:
+.zshrc
+.zprofile
+.zshenv
+.gitconfig
+.gitignore_global
+.tmux.conf
+.p10k.zsh
+.config/karabiner/karabiner.json
+.config/kitty/kitty.conf
