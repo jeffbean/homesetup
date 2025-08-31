@@ -3,9 +3,22 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[user]
-	name = Jeffrey Bean
-	email = jeffbean@users.noreply.github.com
 
-[includeIf "gitdir:~/"]
-    path = ~/.bean_gitconfig
+# Shared, non-personal Git config
+[alias]
+	st = status
+	ci = commit
+	br = branch -vv --sort=committerdate
+	co = checkout
+	df = diff
+	dc = diff --cached
+	lg = log -p
+	ls = !git --no-pager log @{u}...HEAD --graph --decorate --left-right --boundary --abbrev-commit --date=relative --oneline
+	who = shortlog -s --
+	logg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+	po = pull origin main
+	an = commit --amend --no-edit
+
+# Personal details go in ~/.gitconfig.local (not tracked)
+[includeIf "exists:~/.gitconfig.local"]
+	path = ~/.gitconfig.local

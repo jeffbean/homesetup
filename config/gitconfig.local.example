@@ -1,0 +1,12 @@
+# ~/.gitconfig.local (example) — not tracked by the repo
+# Copy to your HOME and edit values:
+
+[user]
+	name = Your Name
+	email = your-email@example.com
+
+# You can add signing settings here as well:
+# [user]
+# 	signingkey = ABCDEF1234567890
+# [commit]
+# 	gpgsign = true
