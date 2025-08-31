@@ -1,0 +1,15 @@
+# ~/.ssh/config (example)
+
+Host *
+  UseKeychain yes
+  AddKeysToAgent yes
+  ServerAliveInterval 30
+  ServerAliveCountMax 6
+  TCPKeepAlive yes
+
+# Example host
+# Host github.com
+#   HostName github.com
+#   User git
+#   IdentityFile ~/.ssh/id_ed25519
+

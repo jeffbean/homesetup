@@ -34,8 +34,25 @@ brew "zsh-syntax-highlighting"
 brew "starship"
 # Nerd Font for better glyphs in terminal prompt
 cask "font-jetbrains-mono-nerd-font"
+
+# Developer CLIs
+brew "fzf"
+brew "ripgrep"
+brew "fd"
+brew "eza"
+brew "bat"
+brew "tree"
+brew "gnu-sed"
+brew "gnu-tar"
+
+# GPG pinentry for macOS dialogs
+brew "pinentry-mac"
 # Move and resize windows using keyboard shortcuts or snap areas
 cask "rectangle"
+
+# 1Password (app) + CLI for secret management and future automation
+cask "1password"
+cask "1password-cli"
 # Tap for git-spice
 tap "abhinav/tap"
 vscode "golang.go"

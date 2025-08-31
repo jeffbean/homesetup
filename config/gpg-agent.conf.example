@@ -1,0 +1,7 @@
+# Example GPG Agent config for macOS
+default-cache-ttl 600
+max-cache-ttl 7200
+
+# Use macOS pinentry dialog
+pinentry-program /opt/homebrew/bin/pinentry-mac
+
