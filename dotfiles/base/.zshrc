@@ -70,7 +70,7 @@ ZSH_THEME="bean-headline"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git autojump)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -102,3 +102,11 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# --- Optional: autojump initialization (fallback if plugin doesn't source it) ---
+# Prefer not to call `brew` at startup; check common paths directly.
+if [[ -r /opt/homebrew/etc/profile.d/autojump.sh ]]; then
+  . /opt/homebrew/etc/profile.d/autojump.sh
+elif [[ -r /usr/local/etc/profile.d/autojump.sh ]]; then
+  . /usr/local/etc/profile.d/autojump.sh
+fi
