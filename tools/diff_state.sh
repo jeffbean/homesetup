@@ -39,13 +39,26 @@ else : > "$OUT_DIR/_cur_brew.txt"; fi
 if [[ -f "$DES_DIR/desired_brew_formulae.txt" ]]; then
   sort -u "$DES_DIR/desired_brew_formulae.txt" > "$OUT_DIR/_des_brew.txt"
 else : > "$OUT_DIR/_des_brew.txt"; fi
+# Compute dependency closure of desired formulae (runtime deps only)
+: > "$OUT_DIR/_des_brew_closure.txt"
+if command -v brew >/dev/null 2>&1; then
+  if [[ -s "$OUT_DIR/_des_brew.txt" ]]; then
+    # Use union to get combined deps; ignore errors for missing formulae
+    while IFS= read -r f; do
+      [[ -n "$f" ]] || continue
+      brew deps --union "$f" 2>/dev/null || true
+    done < "$OUT_DIR/_des_brew.txt" | sort -u > "$OUT_DIR/_des_brew_closure.txt" || true
+  fi
+fi
+# Allowed set = desired top-level + their dependencies
+sort -u "$OUT_DIR/_des_brew.txt" "$OUT_DIR/_des_brew_closure.txt" > "$OUT_DIR/_des_brew_allowed.txt"
 comm -13 "$OUT_DIR/_cur_brew.txt" "$OUT_DIR/_des_brew.txt" > "$OUT_DIR/_brew_to_install.txt" || true
-comm -23 "$OUT_DIR/_cur_brew.txt" "$OUT_DIR/_des_brew.txt" > "$OUT_DIR/_brew_extras.txt" || true
+comm -23 "$OUT_DIR/_cur_brew.txt" "$OUT_DIR/_des_brew_allowed.txt" > "$OUT_DIR/_brew_extras.txt" || true
 {
   echo "To install:"
   sed 's/^/  - /' "$OUT_DIR/_brew_to_install.txt"
   echo ""
-  echo "Not in desired (extras):"
+  echo "Not in desired (extras, excluding deps of desired):"
   sed 's/^/  - /' "$OUT_DIR/_brew_extras.txt"
 } >> "$REPORT"
 
