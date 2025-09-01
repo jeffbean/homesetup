@@ -1,0 +1,11 @@
+{
+  "files": [
+    {
+      "path": "generated/example.txt",
+      "template": "hello.tmpl",
+      "data": {
+        "Note": "example"
+      }
+    }
+  ]
+}
