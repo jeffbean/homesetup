@@ -1,25 +1,6 @@
-# Personal macOS Setup – Running TODO List
+# Personal macOS Setup — TODO
 
-This is a living roadmap for refining and maintaining the local setup. Keep items small, idempotent, and testable. Use Conventional Commits when closing items.
-
-## Recently Done
-- [x] Diff report in Markdown (snapshots/diff/<ts>/report.md)
-- [x] Diff excludes indirect Homebrew deps (via `brew deps --union`)
-- [x] Robust Brewfile parsing (POSIX classes)
-- [x] Keyboard defaults (repeat, press-and-hold, F-keys, UI mode)
-- [x] `hidutil` apply script + LaunchAgent template
-- [x] OMZ custom plugin `bean` with `scripts/` + `functions/`
-- [x] `gsnb` function (prefers git-spice, fallback to git)
-- [x] git-spice integration (tap + brew + installer)
-- [x] Tests: diff/plan/hidutil/git-spice + generate_desired + bootstrap smoke
-- [x] Profiles: `tools/profile.sh` + one-command `make profile PROFILE=<name>`
-- [x] Profile-aware setup: Brewfile composition, defaults.d layering, dotfiles overlays, assistants toggles
-- [x] Terminal stacks: OMZ ↔ Starship via profile (`SHELL_STACK`, `PROMPT_FLAVOR`)
-- [x] Starship support + example config
-- [x] Prune snapshots tool + test; `make diff-open`
-- [x] Generalize repo: remove personal gitconfig, add `gitconfig.local` example
-
----
+Keep items small, idempotent, and testable. Prefer inputs under `config/` and thin entrypoints. This list is trimmed to only upcoming work.
 
 ## System Defaults
 - [x] Finder: show status bar, path bar, all filename extensions
@@ -37,10 +18,9 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - [ ] Terminal emulator: none (using built-in Terminal); focus on `tmux` workflow
 - [ ] Utilities: `AltTab`, `Raycast`/`Alfred` (pick one)
 - [x] 1Password + CLI (for secrets and automation)
-- [ ] MAS entries for required Apple apps (ids pinned in Brewfile)
+- [ ] MAS entries for required Apple apps (ids pinned in config/Brewfile)
 - [ ] Example configs under `config/` for selected tools (iTerm2/Alacritty)
-  - [x] Starship example config
-- [ ] Tests: `brew bundle check` dry-run gate in `tests/homebrew.bats`
+- [ ] Tests: `brew bundle check` dry-run gate (already present; expand cases)
 
 ## Shell & Dotfiles
 - [ ] Expand OMZ `bean` plugin modules:
@@ -53,20 +33,15 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 ### Dotfiles VCS (bare git under $HOME)
 - [ ] Evaluate bare repo path (e.g., `~/.homesetup.git`) with work-tree=`$HOME`
 - [ ] Keep `stow` workflow for modularity; define ignores to avoid repo noise
-- [ ] Wrapper script (`tools/home_git.sh`) to init/status/config (dry-run by default)
 - [ ] Safety: backup conflicting files; migration plan from current stow layout
-- [ ] Tests: wrapper runs dry-run; no mutation without `--apply`
 
 ## Languages/Toolchains
-- [ ] Add `mise` (rtx) or `asdf` to Brewfile (pick one)
-- [ ] `config/mise.example.toml` with pinned versions (node, python, etc.)
-- [ ] Tests: presence + `mise --version` skip‑aware
+- [ ] Evaluate `mise` (rtx) baseline (example config + optional profile enable)
+- [ ] Tests: presence + `mise --version` (skip‑aware)
 
 ## SSH / GPG (templates only; no secrets)
-- [x] `config/ssh/config.example`
-- [x] `config/gpg-agent.conf.example` and `pinentry-mac` in Brewfile
 - [ ] Docs: short note on generating keys + Keychain integration
-- [ ] Tests: file existence only
+- [ ] Tests: file existence only (already present)
 
 ## Security & Updates (documented, not enforced)
 - [ ] Firewall enabled (doc only)
@@ -78,12 +53,10 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - [ ] Optional flag to include dependency closure details in report (for debugging)
 - [x] `tools/prune_snapshots.sh` to keep last N snapshots
 - [x] Make target: `diff-open`
-- [ ] Make target: `snapshots-clean N`
-- [x] Tests: prune dry‑run
+- [ ] Make target: `snapshots-clean N` (script exists; keep minimal entrypoints)
 
 ## Roadmap (Bigger Items)
-- [ ] Migrate shell tooling to Go (CLI for plan/diff/apply)
-  - [ ] Define module structure (cmd/..., pkg/...)
+- [ ] Migrate orchestration to Go CLI (cmd/homesetup)
   - [ ] Reimplement `generate_desired`, `diff_state`, `snapshot_current`
   - [ ] Keep shell as thin wrappers during transition
 - [ ] macOS VM integration tests
@@ -92,9 +65,9 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
   - [ ] Collect artifacts (logs, diff report, timing)
 
 ## Docs
-- [ ] `docs/recovery.md`: lost laptop → reinstall + restore flow
-- [ ] `docs/decisions.md`: notes on choices (hidutil vs Karabiner, OMZ vs Starship, mise vs asdf)
-- [ ] `docs/first-boot.md`: privacy permissions (Terminal Full Disk Access), enabling services
+- [ ] recovery.md: reinstall + restore flow
+- [ ] decisions.md: hidutil vs Karabiner, OMZ vs Starship, mise vs asdf
+- [ ] first-boot.md: privacy permissions (Terminal Full Disk Access), enabling services
 
 ---
 
