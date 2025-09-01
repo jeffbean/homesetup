@@ -49,6 +49,13 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - [x] Optional: starship prompt support (`config/starship.example.toml`)
 - [ ] Tests: `zsh` plugin loads without errors (smoke via `zsh -ic true` if available)
 
+### Dotfiles VCS (bare git under $HOME)
+- [ ] Evaluate bare repo path (e.g., `~/.homesetup.git`) with work-tree=`$HOME`
+- [ ] Keep `stow` workflow for modularity; define ignores to avoid repo noise
+- [ ] Wrapper script (`tools/home_git.sh`) to init/status/config (dry-run by default)
+- [ ] Safety: backup conflicting files; migration plan from current stow layout
+- [ ] Tests: wrapper runs dry-run; no mutation without `--apply`
+
 ## Languages/Toolchains
 - [ ] Add `mise` (rtx) or `asdf` to Brewfile (pick one)
 - [ ] `config/mise.example.toml` with pinned versions (node, python, etc.)
