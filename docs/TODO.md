@@ -30,9 +30,8 @@ Keep items small, idempotent, and testable. Prefer inputs under `config/` and th
 - [x] Optional: starship prompt support (`config/examples/starship.toml`)
 - [ ] Tests: `zsh` plugin loads without errors (smoke via `zsh -ic true` if available)
 
-### Dotfiles VCS (bare git under $HOME)
-- [ ] Evaluate bare repo path (e.g., `~/.homesetup.git`) with work-tree=`$HOME`
-- [ ] Keep `stow` workflow for modularity; define ignores to avoid repo noise
+### Dotfiles Management
+- [x] Prefer `stow` for modularity; define ignores to avoid repo noise
 - [ ] Safety: backup conflicting files; migration plan from current stow layout
 
 ## Languages/Toolchains

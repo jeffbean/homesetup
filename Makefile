@@ -23,10 +23,8 @@ help:
 	@echo "  diff-dotfiles - Unified diff between dotfiles/ and $${HOME}"
 	@echo "  import     - Propose updates from current system into repo"
 	@echo "  import-apply - Apply updates from current system into repo"
-		@echo "  prune-snapshots        - Dry-run prune to keep last N snapshots (KEEP=N)"
-		@echo "  diff-open              - Open latest diff report in default viewer"
-        @echo "  home-git-init          - Init bare git in HOME (dry-run; use APPLY=1 to exec)"
-        @echo "  home-git-status        - Status of bare git in HOME"
+	@echo "  prune-snapshots        - Dry-run prune to keep last N snapshots (KEEP=N)"
+	@echo "  diff-open              - Open latest diff report in default viewer"
  
 
 # --- Simple interface ---
@@ -129,11 +127,7 @@ snapshots-clean:
 	@bash tools/prune_snapshots.sh ${KEEP:+--keep ${KEEP}} --apply || true
 
 # Activate a profile and apply the full setup
-home-git-init:
-	@bash tools/home_git.sh init ${APPLY:+--apply} ${DIR:+--dir ${DIR}}
-
-home-git-status:
-	@bash tools/home_git.sh status ${DIR:+--dir ${DIR}} || true
+### Removed home-git targets; use stow-only workflow
 
 ### Go CLI targets removed for now; design is on the roadmap
 
