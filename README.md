@@ -6,7 +6,7 @@ Built with a mix of pragmatic shell and as much AI assistance as is sane — all
 
 ## Quick Start
 
-- Clone the repo and review the `Brewfile` and `setup/defaults.sh`.
+- Clone the repo and review `config/Brewfile` and `setup/defaults.sh`.
 - Base is the default profile (Starship, assistants off).
 - Pick a profile and apply:
   - `make profile PROFILE=base` (Starship prompt, assistants disabled)
@@ -19,7 +19,7 @@ Built with a mix of pragmatic shell and as much AI assistance as is sane — all
 
 Profiles live under `config/profiles/<name>/`:
 - `profile.env`: `HS_PROFILE`, `SHELL_STACK` (omz|starship), `PROMPT_FLAVOR`
-- `Brewfile.extra`: merged with base Brewfile during apply/desired
+- `Brewfile.extra`: merged with base Brewfile (`config/Brewfile`) during apply/desired
 - `assistants.env`: toggles for assistants install
 
 Optional per‑profile layers:
@@ -44,7 +44,34 @@ Switch in one command:
 - `make apply` — apply brew bundle, defaults, dotfiles
 - `make diff` / `make diff-open` — snapshot + report
 - `make prune-snapshots KEEP=N` — preview prune; `make snapshots-clean KEEP=N` to apply
-- `make check` / `make test` — lint and tests
+- `make check` / `make test` — lint and tests (`FIX=1` to auto‑format)
+
+## Repository Layout
+
+- `config/` — Inputs to the setup (no secrets)
+  - `Brewfile`: Homebrew formulae/casks and MAS apps (source of truth)
+  - `profiles/<name>/`: `profile.env`, `Brewfile.extra`, optional `assistants.env`
+  - `*.example` configs for tools (ssh, gpg-agent, starship, hidutil, etc.)
+- `dotfiles/` — Dotfile packages to be stowed into `$HOME`
+  - `overlays/<profile>/` for profile‑specific files layered on top
+- `setup/` — macOS bootstrap scripts (temporary until Go CLI replaces)
+- `tools/` — thin orchestration + shared `lib.sh` helpers (entrypoint scripts)
+- `cmd/` — Go CLI (WIP): plan/diff/apply with profiles and inputs
+- `tests/` — bats tests for scripts and defaults
+- `snapshots/` — artifacts: current/desired state and diffs
+- `docs/` — notes and procedures
+
+Top level stays minimal: a Makefile that delegates to `tools/` and eventually the Go CLI.
+
+## Design Principles (Expandable)
+
+- Inputs live under `config/` so we can evolve the engine without moving data.
+- Scripts are idempotent and safe; destructive actions require explicit flags.
+- `tools/lib.sh` centralizes logging, DRY‑RUN, profile loading, and path resolution.
+- Environment knobs:
+  - `HS_PROFILE`: active profile (defaults to `base`)
+  - `HS_BREWFILE`: override path to Brewfile (else `config/Brewfile`)
+- Makefile remains a thin entrypoint; the Go CLI will absorb orchestration over time while keeping the same UX (`plan`, `diff`, `apply`).
 
 ## Optional: mise (tool/runtime manager)
 
