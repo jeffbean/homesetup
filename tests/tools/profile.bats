@@ -3,11 +3,10 @@
 @test "profile list returns profiles" {
   run bash tools/profile.sh list
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q "dev"
+  echo "$output" | grep -q "base"
 }
 
 @test "profile activate dry-run works" {
-  run bash tools/profile.sh activate dev
+  run bash tools/profile.sh activate base
   [ "$status" -eq 0 ]
 }
-

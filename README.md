@@ -7,9 +7,10 @@ Built with a mix of pragmatic shell and as much AI assistance as is sane — all
 ## Quick Start
 
 - Clone the repo and review the `Brewfile` and `setup/defaults.sh`.
+- Base is the default profile (Starship, assistants off).
 - Pick a profile and apply:
-  - `make profile PROFILE=dev` (Starship prompt, assistants enabled)
-  - `make profile PROFILE=minimal` (Oh My Zsh, assistants disabled)
+  - `make profile PROFILE=base` (Starship prompt, assistants disabled)
+  - `make profile PROFILE=wip` (Starship prompt, assistants enabled + extras)
 - Preview & diff:
   - `make plan` (dry‑run checks)
   - `make diff` and `make diff-open`
@@ -54,4 +55,3 @@ Switch in one command:
 
 - Keep changes small and idempotent. Prefer declarative lists and tests.
 - Use Conventional Commits and update `docs/TODO.md` as you go.
-

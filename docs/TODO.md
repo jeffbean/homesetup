@@ -12,33 +12,41 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - [x] `gsnb` function (prefers git-spice, fallback to git)
 - [x] git-spice integration (tap + brew + installer)
 - [x] Tests: diff/plan/hidutil/git-spice + generate_desired + bootstrap smoke
+- [x] Profiles: `tools/profile.sh` + one-command `make profile PROFILE=<name>`
+- [x] Profile-aware setup: Brewfile composition, defaults.d layering, dotfiles overlays, assistants toggles
+- [x] Terminal stacks: OMZ ↔ Starship via profile (`SHELL_STACK`, `PROMPT_FLAVOR`)
+- [x] Starship support + example config
+- [x] Prune snapshots tool + test; `make diff-open`
+- [x] Generalize repo: remove personal gitconfig, add `gitconfig.local` example
 
 ---
 
 ## System Defaults
-- [ ] Finder: show status bar, path bar, all filename extensions
-- [ ] Finder: new windows target `$HOME`
-- [ ] Dock: size/magnify, autohide, remove recents
-- [ ] Trackpad/Mouse: tap-to-click, three‑finger drag, natural scrolling
-- [ ] Screenshots: set default dir to `~/Pictures/Screenshots`
+- [x] Finder: show status bar, path bar, all filename extensions
+- [x] Finder: new windows target `$HOME`
+- [x] Dock: size/magnify, autohide, remove recents
+- [x] Trackpad/Mouse: tap-to-click, three‑finger drag, natural scrolling
+- [x] Screenshots: set default dir to `~/Pictures/Screenshots`
 - [ ] Safari/Privacy: disable auto-open safe downloads, tracking prevention, show full URL
 - [ ] Sleep/Password: require password after sleep/wake
-- [ ] Tests: read‑only checks for each default (types/values) in `tests/defaults/`
+- [x] Tests: read‑only/presence checks in `tests/defaults/`
 
 ## Homebrew: Apps, Fonts, CLIs
-- [ ] Developer CLIs: `fzf`, `ripgrep`, `fd`, `eza`, `bat`, `tree`, `gnu-sed`, `gnu-tar`
+- [x] Developer CLIs: `fzf`, `ripgrep`, `fd`, `eza`, `bat`, `tree`, `gnu-sed`, `gnu-tar`
 - [ ] Terminal + Fonts: `iterm2` (or `alacritty`), `font-jetbrains-mono-nerd-font`
 - [ ] Utilities: `AltTab`, `Raycast`/`Alfred` (pick one)
+- [x] 1Password + CLI (for secrets and automation)
 - [ ] MAS entries for required Apple apps (ids pinned in Brewfile)
-- [ ] Example configs under `config/` for selected tools (iTerm2/Alacritty/starship)
+- [ ] Example configs under `config/` for selected tools (iTerm2/Alacritty)
+  - [x] Starship example config
 - [ ] Tests: `brew bundle check` dry-run gate in `tests/homebrew.bats`
 
 ## Shell & Dotfiles
 - [ ] Expand OMZ `bean` plugin modules:
   - [ ] `scripts/git.zsh`: git aliases/wrappers (lean on `git-spice` where useful)
-  - [ ] `scripts/direnv.zsh`: hook only if present
-  - [ ] `scripts/fzf.zsh`: keybindings if installed
-- [ ] Optional: starship prompt support (`config/starship.example.toml`)
+  - [x] `scripts/direnv.zsh`: hook only if present
+  - [x] `scripts/fzf.zsh`: keybindings if installed
+- [x] Optional: starship prompt support (`config/starship.example.toml`)
 - [ ] Tests: `zsh` plugin loads without errors (smoke via `zsh -ic true` if available)
 
 ## Languages/Toolchains
@@ -47,8 +55,8 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - [ ] Tests: presence + `mise --version` skip‑aware
 
 ## SSH / GPG (templates only; no secrets)
-- [ ] `config/ssh/config.example`
-- [ ] `config/gpg-agent.conf.example` and `pinentry-mac` in Brewfile
+- [x] `config/ssh/config.example`
+- [x] `config/gpg-agent.conf.example` and `pinentry-mac` in Brewfile
 - [ ] Docs: short note on generating keys + Keychain integration
 - [ ] Tests: file existence only
 
@@ -60,9 +68,20 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 ## Diff / Snapshots / Tooling
 - [ ] Treat formula pulled in by casks as allowed deps in extras
 - [ ] Optional flag to include dependency closure details in report (for debugging)
-- [ ] `tools/prune_snapshots.sh` to keep last N snapshots
-- [ ] Make targets: `diff-open`, `snapshots-clean N`
-- [ ] Tests: prune dry‑run + report generation flags
+- [x] `tools/prune_snapshots.sh` to keep last N snapshots
+- [x] Make target: `diff-open`
+- [ ] Make target: `snapshots-clean N`
+- [x] Tests: prune dry‑run
+
+## Roadmap (Bigger Items)
+- [ ] Migrate shell tooling to Go (CLI for plan/diff/apply)
+  - [ ] Define module structure (cmd/..., pkg/...)
+  - [ ] Reimplement `generate_desired`, `diff_state`, `snapshot_current`
+  - [ ] Keep shell as thin wrappers during transition
+- [ ] macOS VM integration tests
+  - [ ] Script/automation to bring up a macOS VM (e.g., Anka, UTM, or Apple Silicon virtualize if feasible)
+  - [ ] Run `make init` and verify idempotence (`make update`)
+  - [ ] Collect artifacts (logs, diff report, timing)
 
 ## Docs
 - [ ] `docs/recovery.md`: lost laptop → reinstall + restore flow
@@ -76,4 +95,3 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - Keep macOS defaults declarative and testable (read checks)
 - Prefer taps/versions pinned where feasible
 - Use `.example` files for templates; keep secrets out of git
-

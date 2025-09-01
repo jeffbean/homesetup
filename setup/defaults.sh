@@ -69,6 +69,7 @@ if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
   # shellcheck disable=SC1090
   source "$HOME/.config/homesetup/profile.env"
 fi
+: "${HS_PROFILE:=base}"
 if [[ -n "${HS_PROFILE:-}" && -r "$(dirname "$0")/defaults.d/${HS_PROFILE}.sh" ]]; then
   # shellcheck disable=SC1090
   source "$(dirname "$0")/defaults.d/${HS_PROFILE}.sh"

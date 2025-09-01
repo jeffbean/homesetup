@@ -36,6 +36,7 @@ if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
   # shellcheck disable=SC1090
   source "$HOME/.config/homesetup/profile.env"
 fi
+: "${HS_PROFILE:=base}"
 
 AUTO_YES=false
 DO_BUNDLE=true

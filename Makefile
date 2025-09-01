@@ -61,10 +61,29 @@ apply:
 	@echo "[+] Applying desired state…"
 	@bash setup/bootstrap_macos.sh
 	@$(MAKE) apply-dotfiles
-	@# Optional assistants install if requested: ASSISTANTS=1 make apply
-	@if [ "$$ASSISTANTS" = "1" ] || [ "$$ASSISTANTS" = "true" ]; then \
-	  bash setup/install-assistants.sh --apply || true; \
-	fi
+	@# Assistants install policy:
+	@# - ASSISTANTS=1  -> apply (executes)
+	@# - ASSISTANTS=0  -> skip regardless of profile
+		@# - default       -> apply if profile enables; otherwise skip
+		@if [ "$$ASSISTANTS" = "1" ] || [ "$$ASSISTANTS" = "true" ]; then \
+		  bash setup/install-assistants.sh --apply || true; \
+		elif [ "$$ASSISTANTS" = "0" ] || [ "$$ASSISTANTS" = "false" ]; then \
+		  echo "[+] Skipping assistants (ASSISTANTS=$$ASSISTANTS)"; \
+		else \
+		  HS_PROFILE_TMP=base; \
+		  [ -r "$$HOME/.config/homesetup/profile.env" ] && . "$$HOME/.config/homesetup/profile.env" || true; \
+		  : "$${HS_PROFILE:=$$HS_PROFILE_TMP}"; \
+		  if [ -r "config/profiles/$$HS_PROFILE/assistants.env" ]; then . "config/profiles/$$HS_PROFILE/assistants.env"; fi; \
+		  WANT_APPLY=0; \
+		  { [ "$$INSTALL_CODEX" = "1" ] || [ "$$INSTALL_CODEX" = "true" ]; } && WANT_APPLY=1 || true; \
+		  { [ "$$INSTALL_CLAUDE" = "1" ] || [ "$$INSTALL_CLAUDE" = "true" ]; } && WANT_APPLY=1 || true; \
+		  if [ "$$WANT_APPLY" = "1" ]; then \
+		    echo "[+] Assistants enabled by profile '$$HS_PROFILE' → applying"; \
+		    bash setup/install-assistants.sh --apply || true; \
+		  else \
+		    echo "[+] Assistants disabled by profile '$$HS_PROFILE' → skipping"; \
+		  fi; \
+		fi
 	@echo "[+] Apply complete."
 
 # Initial setup: everything end-to-end.
@@ -116,8 +135,9 @@ bootstrap:
 # Link dotfiles only (idempotent)
 apply-dotfiles:
 	@set -euo pipefail; \
-	# Load active profile if present
+	# Load active profile if present, default to base
 	if [ -r "$$HOME/.config/homesetup/profile.env" ]; then . "$$HOME/.config/homesetup/profile.env"; fi; \
+	: "$${HS_PROFILE:=base}"; \
 	if [ -d dotfiles ] && [ "`ls -A dotfiles 2>/dev/null | wc -l`" -gt 0 ]; then \
 	  if command -v stow >/dev/null 2>&1; then \
 	    for pkg in dotfiles/*; do \
@@ -174,6 +194,9 @@ prune-snapshots:
 
 diff-open:
 	@open snapshots/diff/latest/report.md || true
+
+snapshots-clean:
+	@bash tools/prune_snapshots.sh ${KEEP:+--keep ${KEEP}} --apply || true
 
 # Activate a profile and apply the full setup
 profile:

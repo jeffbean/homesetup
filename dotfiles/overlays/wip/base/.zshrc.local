@@ -1,0 +1,3 @@
+# WIP profile overlay: extra zsh options/aliases
+setopt autocd extended_glob
+alias k='kubectl'

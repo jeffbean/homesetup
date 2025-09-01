@@ -19,6 +19,7 @@ if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
   # shellcheck disable=SC1090
   source "$HOME/.config/homesetup/profile.env"
 fi
+: "${HS_PROFILE:=base}"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/desired/$STAMP"

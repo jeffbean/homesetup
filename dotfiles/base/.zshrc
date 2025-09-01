@@ -79,7 +79,7 @@ ZSH_THEME="bean-headline"
 plugins=(git autojump bean)
 
 # Choose shell stack: omz (Oh My Zsh) or starship-only via profile
-if [[ "${SHELL_STACK:-omz}" == "omz" ]]; then
+if [[ "${SHELL_STACK:-starship}" == "omz" ]]; then
   source $ZSH/oh-my-zsh.sh
 else
   # Minimal loader for bean plugin without OMZ
