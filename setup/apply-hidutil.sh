@@ -18,14 +18,13 @@ Notes:
 USAGE
 }
 
-log() { printf "[+] %s\n" "$*"; }
-warn() { printf "[!] %s\n" "$*"; }
-die() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
-[[ "$(uname -s)" == "Darwin" ]] || die "hidutil applies only on macOS (Darwin)."
+require_macos
 
 DO_APPLY=false
 DO_RESET=false

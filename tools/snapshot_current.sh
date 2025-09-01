@@ -4,17 +4,13 @@ set -euo pipefail
 # Snapshot current machine state for diffing against desired setup.
 # Captures: Homebrew formulae/casks, MAS apps, selected macOS defaults, dotfiles link status.
 
-log() { printf "[+] %s\n" "$*"; }
-warn() { printf "[!] %s\n" "$*"; }
-error() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
-
-[[ "$(uname -s)" == "Darwin" ]] || error "This snapshot tool targets macOS (Darwin)."
-
+# Repo root -> load shared lib
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
+
+require_macos
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/$STAMP"
@@ -80,24 +76,6 @@ fi
 
 # ---------- Dotfiles link status (stow targets) ----------
 log "Capturing dotfiles link status…"
-
-resolve_path() {
-  local p="$1"
-  if command -v realpath > /dev/null 2>&1; then
-    realpath "$p" 2> /dev/null || echo "$p"
-  elif command -v python3 > /dev/null 2>&1; then
-    python3 - "$p" << 'PY'
-import os,sys
-p=sys.argv[1]
-try:
-    print(os.path.realpath(p))
-except Exception:
-    print(p)
-PY
-  else
-    echo "$p"
-  fi
-}
 
 DOT_ROOT="$REPO_ROOT/dotfiles"
 {

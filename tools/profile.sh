@@ -37,19 +37,10 @@ done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
 profiles_dir="$REPO_ROOT/config/profiles"
-
-log() { printf "[+] %s\n" "$*"; }
-die() { printf "[x] %s\n" "$*" >&2; exit 1; }
-
-run() {
-  if [[ "$DRY_RUN" == true ]]; then
-    echo "+ $*"
-  else
-    eval "$*"
-  fi
-}
 
 if [[ "$CMD" == "list" ]]; then
   if [[ ! -d "$profiles_dir" ]]; then die "No profiles dir: $profiles_dir"; fi

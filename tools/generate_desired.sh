@@ -3,23 +3,16 @@ set -euo pipefail
 
 # Generate desired state from this repo: Brewfile, defaults, and dotfiles.
 
-log() { printf "[+] %s\n" "$*"; }
-error() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
-
-[[ "$(uname -s)" == "Darwin" ]] || error "This tool targets macOS (Darwin)."
-
+# Repo root -> load shared lib
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
+
+require_macos
 
 # Load active profile if present
-if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1091
-  source "$HOME/.config/homesetup/profile.env"
-fi
-: "${HS_PROFILE:=base}"
+load_profile_env
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/desired/$STAMP"
@@ -27,12 +20,12 @@ mkdir -p "$OUT_DIR"
 
 # ---------- Brewfile parsing ----------
 # Compose Brewfile with profile extras if available
-BREWFILE="$REPO_ROOT/Brewfile"
+BREWFILE="$(brewfile_path)"
 if [[ -n "${HS_PROFILE:-}" && -f "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra" ]]; then
   TMP_COMPOSED="$REPO_ROOT/snapshots/logs/Brewfile.composed.$STAMP"
   mkdir -p "$REPO_ROOT/snapshots/logs"
   {
-    cat "$REPO_ROOT/Brewfile"
+    cat "$BREWFILE"
     printf "\n# --- Profile: %s extras ---\n" "${HS_PROFILE}"
     cat "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra"
   } > "$TMP_COMPOSED"

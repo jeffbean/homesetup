@@ -3,16 +3,13 @@ set -euo pipefail
 
 # Produce a unified diff between repo dotfiles and current $HOME content.
 
-log() { printf "[+] %s\n" "$*"; }
-error() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
-
-[[ "$(uname -s)" == "Darwin" ]] || error "This tool targets macOS (Darwin)."
-
+# Repo root -> load shared lib
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
+
+require_macos
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/diff/$STAMP"

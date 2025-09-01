@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
+
 DRY_RUN=false
 for arg in "$@"; do
   case "$arg" in
@@ -16,14 +22,6 @@ USAGE
       ;;
   esac
 done
-
-run() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    echo "+ $*"
-  else
-    "$@"
-  fi
-}
 
 echo "Applying macOS defaults (DRY_RUN=$DRY_RUN)…"
 
@@ -74,11 +72,7 @@ run defaults write com.apple.screensaver askForPassword -int 1
 run defaults write com.apple.screensaver askForPasswordDelay -int 0
 
 # Profile-specific defaults (optional)
-if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1091
-  source "$HOME/.config/homesetup/profile.env"
-fi
-: "${HS_PROFILE:=base}"
+load_profile_env
 if [[ -n "${HS_PROFILE:-}" && -r "$(dirname "$0")/defaults.d/${HS_PROFILE}.sh" ]]; then
   # shellcheck disable=SC1090
   source "$(dirname "$0")/defaults.d/${HS_PROFILE}.sh"

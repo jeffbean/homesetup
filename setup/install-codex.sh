@@ -44,14 +44,13 @@ for arg in "$@"; do
   esac
 done
 
-log() { printf "[+] %s\n" "$*"; }
-warn() { printf "[!] %s\n" "$*"; }
-die() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
-[[ "$(uname -s)" == "Darwin" ]] || die "This installer targets macOS."
+require_macos
 
 if command -v codex > /dev/null 2>&1; then
   ver=$(codex --version 2> /dev/null || true)
@@ -59,13 +58,7 @@ if command -v codex > /dev/null 2>&1; then
   exit 0
 fi
 
-run() {
-  if [[ "$DRY_RUN" == true ]]; then
-    echo "+ $*"
-  else
-    eval "$*"
-  fi
-}
+
 
 detect_method() {
   case "$METHOD" in

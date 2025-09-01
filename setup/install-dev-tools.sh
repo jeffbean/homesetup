@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
+
 # Install local dev tools used by make check/test. Dry-run by default.
 
 DRY_RUN=true
@@ -24,16 +30,6 @@ USAGE
       ;;
   esac
 done
-
-log() { printf "[+] %s\n" "$*"; }
-
-run() {
-  if [[ "${DRY_RUN:-true}" == true ]]; then
-    echo "+ $*"
-  else
-    eval "$*"
-  fi
-}
 
 if ! command -v brew > /dev/null 2>&1; then
   echo "[x] Homebrew not found. Please install Homebrew first: https://brew.sh" >&2

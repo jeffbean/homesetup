@@ -27,14 +27,11 @@ for ((i=1; i<=$#; i++)); do
   esac
 done
 
-log() { printf "[+] %s\n" "$*"; }
-run() {
-  if [[ "$DRY_RUN" == true ]]; then
-    echo "+ $*"
-  else
-    eval "$*"
-  fi
-}
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
 prune_dir() { # (path)
   local dir="$1"

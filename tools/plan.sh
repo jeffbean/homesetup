@@ -3,8 +3,11 @@ set -euo pipefail
 
 # Plan: preview what `make apply` would do, using only dry-run checks.
 
-log() { printf "[+] %s\n" "$*"; }
-warn() { printf "[!] %s\n" "$*"; }
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)"
 
@@ -20,8 +23,9 @@ fi
 echo "---"
 log "Homebrew dry-run (brew bundle check)…"
 if command -v brew > /dev/null 2>&1; then
-  if [[ -f "$REPO_ROOT/Brewfile" ]]; then
-    brew bundle check --file="$REPO_ROOT/Brewfile" || true
+  BF="$(brewfile_path)"
+  if [[ -f "$BF" ]]; then
+    brew bundle check --file="$BF" || true
   else
     warn "Brewfile not found"
   fi

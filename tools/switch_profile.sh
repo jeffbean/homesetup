@@ -29,7 +29,11 @@ if [[ -z "$PROFILE" ]]; then
   usage; exit 2
 fi
 
-log() { printf "[+] %s\n" "$*"; }
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
 log "Activating profile: $PROFILE"
 bash "$(dirname "$0")/profile.sh" activate "$PROFILE" --apply
@@ -40,4 +44,3 @@ if [[ "$APPLY" == true ]]; then
 else
   log "Profile activated. Skipping apply."
 fi
-

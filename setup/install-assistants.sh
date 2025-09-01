@@ -32,30 +32,18 @@ USAGE
 }
 
 # Load active profile + profile-specific assistants env (so profiles can toggle installs)
-if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1091
-  source "$HOME/.config/homesetup/profile.env"
-fi
- : "${HS_PROFILE:=base}"
-if [[ -n "${HS_PROFILE:-}" && -r "$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)/config/profiles/${HS_PROFILE}/assistants.env" ]]; then
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
+
+# Load active profile + profile-specific assistants env (so profiles can toggle installs)
+load_profile_env
+if [[ -n "${HS_PROFILE:-}" && -r "$REPO_ROOT/config/profiles/${HS_PROFILE}/assistants.env" ]]; then
   # shellcheck disable=SC1090
-  source "$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)/config/profiles/${HS_PROFILE}/assistants.env"
+  source "$REPO_ROOT/config/profiles/${HS_PROFILE}/assistants.env"
 fi
-
-log() { printf "[+] %s\n" "$*"; }
-warn() { printf "[!] %s\n" "$*"; }
-die() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
-
-run() {
-  if [[ "$DRY_RUN" == true ]]; then
-    echo "+ $*"
-  else
-    eval "$*"
-  fi
-}
 
 ONLY_SET=false
 while [[ $# -gt 0 ]]; do
@@ -98,7 +86,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ "$(uname -s)" == "Darwin" ]] || die "This installer targets macOS."
+require_macos
 
 # -- Codex --
 install_codex() {

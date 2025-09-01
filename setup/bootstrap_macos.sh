@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-confirm() {
-  local msg=${1:-"Proceed?"}
-  if [[ "${AUTO_YES:-false}" == "true" ]]; then return 0; fi
-  read -r -p "$msg [y/N] " reply || true
-  [[ "$reply" == "y" || "$reply" == "Y" ]]
-}
-
-log() { printf "[+] %s\n" "$*"; }
-warn() { printf "[!] %s\n" "$*"; }
-error() {
-  printf "[x] %s\n" "$*" >&2
-  exit 1
-}
+# Repo root -> load shared lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/tools/lib.sh"
 
 usage() {
   cat << 'USAGE'
@@ -32,11 +24,7 @@ USAGE
 }
 
 # Load active profile if present (PROMPT_FLAVOR, HS_PROFILE, etc.)
-if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1091
-  source "$HOME/.config/homesetup/profile.env"
-fi
-: "${HS_PROFILE:=base}"
+load_profile_env
 
 AUTO_YES=false
 DO_BUNDLE=true
@@ -53,7 +41,7 @@ for arg in "$@"; do
   esac
 done
 
-[[ "$(uname -s)" == "Darwin" ]] || error "This script is for macOS (Darwin) only."
+require_macos
 
 # Xcode Command Line Tools (optional, but recommended)
 if ! xcode-select -p > /dev/null 2>&1; then
@@ -84,15 +72,17 @@ fi
 
 # Brew bundle
 if [[ "$DO_BUNDLE" == "true" ]]; then
-  if [[ -f Brewfile ]]; then
+  BF="$(brewfile_path)"
+  if [[ -f "$BF" ]]; then
     log "Applying Brewfile (brew bundle)…"
     # Compose Brewfile with profile extras if available
-    COMPOSED_BREWFILE="Brewfile"
+    BASE_BREWFILE="$BF"
+    COMPOSED_BREWFILE="$BASE_BREWFILE"
     if [[ -n "${HS_PROFILE:-}" && -f "config/profiles/${HS_PROFILE}/Brewfile.extra" ]]; then
       COMPOSED_BREWFILE="snapshots/logs/Brewfile.composed.$(date +%Y%m%d-%H%M%S)"
       mkdir -p "snapshots/logs"
       {
-        cat Brewfile
+        cat "$BASE_BREWFILE"
         printf "\n# --- Profile: %s extras ---\n" "${HS_PROFILE}"
         cat "config/profiles/${HS_PROFILE}/Brewfile.extra"
       } > "$COMPOSED_BREWFILE"
@@ -106,7 +96,7 @@ if [[ "$DO_BUNDLE" == "true" ]]; then
     brew bundle check --file="$COMPOSED_BREWFILE" > "$CHECK_LOG" 2>&1 || true
     HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file="$COMPOSED_BREWFILE" --no-upgrade > "$APPLY_LOG" 2>&1 || warn "brew bundle encountered issues. See $APPLY_LOG"
   else
-    warn "Brewfile not found. Create one at repo root."
+    warn "Brewfile not found. Create one at config/Brewfile."
   fi
 else
   warn "Skipping brew bundle per flag."
