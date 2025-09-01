@@ -57,3 +57,5 @@ cask "1password-cli"
 tap "abhinav/tap"
 vscode "golang.go"
 vscode "ms-vscode.makefile-tools"
+# Terminal emulator
+cask "iterm2"

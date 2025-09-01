@@ -64,6 +64,15 @@ run defaults write -g com.apple.swipescrolldirection -bool true
 run mkdir -p "$HOME/Pictures/Screenshots"
 run defaults write com.apple.screencapture location -string "$HOME/Pictures/Screenshots"
 
+# Safari / Privacy: show full URL; disable auto-open of "safe" downloads; enable fraud warnings
+run defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
+run defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
+run defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
+
+# Security: require password immediately after sleep or screen saver begins
+run defaults write com.apple.screensaver askForPassword -int 1
+run defaults write com.apple.screensaver askForPasswordDelay -int 0
+
 # Profile-specific defaults (optional)
 if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
   # shellcheck disable=SC1090

@@ -40,6 +40,8 @@ help:
 		@echo "  prune-snapshots        - Dry-run prune to keep last N snapshots (KEEP=N)"
 		@echo "  diff-open              - Open latest diff report in default viewer"
 		@echo "  profile PROFILE=<name> - Activate a profile and apply setup"
+		@echo "  home-git-init          - Init bare git in HOME (dry-run; use APPLY=1 to exec)"
+		@echo "  home-git-status        - Status of bare git in HOME"
 
 # --- Simple interface ---
 
@@ -204,6 +206,12 @@ profile:
 	@bash tools/profile.sh activate "$(PROFILE)" --apply
 	@echo "[+] Profile activated: $(PROFILE)"
 	@$(MAKE) apply
+
+home-git-init:
+	@bash tools/home_git.sh init ${APPLY:+--apply} ${DIR:+--dir ${DIR}}
+
+home-git-status:
+	@bash tools/home_git.sh status ${DIR:+--dir ${DIR}} || true
 
 import:
 	@bash tools/import_current.sh
