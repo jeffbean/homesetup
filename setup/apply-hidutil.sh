@@ -61,7 +61,7 @@ else
   if [[ -f "$CFG_PATH" ]]; then
     payload="$(cat "$CFG_PATH")"
   else
-    warn "No config at config/hidutil.json. Add one (see config/hidutil.example.json)."
+    warn "No config at config/hidutil.json. Add one (see config/examples/hidutil.json)."
     exit 0
   fi
 fi

@@ -27,7 +27,7 @@ Keep items small, idempotent, and testable. Prefer inputs under `config/` and th
   - [ ] `scripts/git.zsh`: git aliases/wrappers (lean on `git-spice` where useful)
   - [x] `scripts/direnv.zsh`: hook only if present
   - [x] `scripts/fzf.zsh`: keybindings if installed
-- [x] Optional: starship prompt support (`config/starship.example.toml`)
+- [x] Optional: starship prompt support (`config/examples/starship.toml`)
 - [ ] Tests: `zsh` plugin loads without errors (smoke via `zsh -ic true` if available)
 
 ### Dotfiles VCS (bare git under $HOME)
@@ -46,7 +46,7 @@ Keep items small, idempotent, and testable. Prefer inputs under `config/` and th
 ## Security & Updates (documented, not enforced)
 - [ ] Firewall enabled (doc only)
 - [ ] Software updates command + cadence (doc only)
-- [ ] VPN/ZT: `tailscale` cask + `config/tailscale.example.sh`
+- [ ] VPN/ZT: `tailscale` cask + `config/examples/tailscale.sh`
 
 ## Diff / Snapshots / Tooling
 - [ ] Treat formula pulled in by casks as allowed deps in extras

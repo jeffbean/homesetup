@@ -37,7 +37,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 LOG_DIR="$REPO_ROOT/snapshots/logs"
 mkdir -p "$LOG_DIR"
 
-PLIST_TEMPLATE="$REPO_ROOT/config/hidutil.launchagent.example.plist"
+PLIST_TEMPLATE="$REPO_ROOT/config/examples/hidutil.launchagent.plist"
 LAUNCH_DIR="$HOME/Library/LaunchAgents"
 DEST_PLIST="$LAUNCH_DIR/com.homesetup.hidutil.plist"
 

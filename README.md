@@ -76,13 +76,13 @@ Top level stays minimal: a Makefile that delegates to `tools/` and eventually th
 ## Optional: mise (tool/runtime manager)
 
 - WIP profile includes `mise` in its Brewfile extras and loads it in shell.
-- Use `config/mise.example.toml` as a starting point for tools like `go`, `golangci-lint`, `goreleaser`, `buf`, `protoc`.
-- For per‑project setup, add `.envrc` from `config/envrc.mise.example` and `direnv allow`.
+- Use `config/examples/mise.toml` as a starting point for tools like `go`, `golangci-lint`, `goreleaser`, `buf`, `protoc`.
+- For per‑project setup, add `.envrc` from `config/examples/envrc.mise` and `direnv allow`.
 
 ## Dotfiles & Secrets
 
 - Shared git config: `dotfiles/base/.gitconfig` (aliases, shared settings)
-- Personal overrides: `~/.gitconfig.local` (see `config/gitconfig.local.example`)
+- Personal overrides: `~/.gitconfig.local` (see `config/examples/gitconfig.local`)
 - Never commit secrets. 1Password and 1Password CLI are installed via Brewfile; use them for secrets in automation.
 
 ## Contributing
