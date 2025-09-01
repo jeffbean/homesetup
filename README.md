@@ -35,7 +35,8 @@ Switch in one command:
 - Homebrew: installs via `brew bundle` (composed per profile)
 - Defaults: applies macOS defaults (base + `defaults.d/<profile>.sh`)
 - Dotfiles: stows `dotfiles/*` then overlays `dotfiles/overlays/<profile>/*`
-- Assistants: profile‑aware toggles (dry‑run by default; set `ASSISTANTS=1` to install during `make apply`)
+- Assistants: profile‑aware toggles (auto‑applies in profiles that enable it; override with `ASSISTANTS=0/1`)
+- Optional mise: multi‑language/tool manager that can pin Go/tooling and other CLIs, enabled by default in the `wip` profile
 
 ## Commands
 
@@ -44,6 +45,12 @@ Switch in one command:
 - `make diff` / `make diff-open` — snapshot + report
 - `make prune-snapshots KEEP=N` — preview prune; `make snapshots-clean KEEP=N` to apply
 - `make check` / `make test` — lint and tests
+
+## Optional: mise (tool/runtime manager)
+
+- WIP profile includes `mise` in its Brewfile extras and loads it in shell.
+- Use `config/mise.example.toml` as a starting point for tools like `go`, `golangci-lint`, `goreleaser`, `buf`, `protoc`.
+- For per‑project setup, add `.envrc` from `config/envrc.mise.example` and `direnv allow`.
 
 ## Dotfiles & Secrets
 

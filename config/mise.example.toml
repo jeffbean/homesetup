@@ -1,0 +1,14 @@
+# Example mise configuration
+
+[env]
+# uncomment to prefer the project's toolchain
+# GOTOOLCHAIN = "auto"
+
+[tools]
+# Pin Go toolchain (honors Go toolchain directive too)
+go = "1.22.x"
+golangci-lint = "1.58.x"
+goreleaser = "1.25.x"
+buf = "1.x"
+protoc = "25.x"
+

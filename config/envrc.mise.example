@@ -1,0 +1,2 @@
+# Use mise with direnv: place as .envrc in a project and run `direnv allow`
+use_mise

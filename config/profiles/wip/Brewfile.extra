@@ -1,1 +1,4 @@
 # WIP profile extras (optional): put experimental packages here
+
+# Optional multi-language/tool manager (Go + toolchain + CLIs)
+brew "mise"
