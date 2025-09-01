@@ -34,3 +34,6 @@ go.work.sum
 snapshots/
 \n+# Local Go build artifact
 /homesetup
+
+# Do not version the active profile file; it is managed at runtime
+dotfiles/**/.config/homesetup/profile.env

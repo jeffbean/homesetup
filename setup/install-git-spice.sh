@@ -24,7 +24,10 @@ USAGE
 for arg in "$@"; do
   case "$arg" in
     --apply) DRY_RUN=false ;;
-    -h|--help) usage; exit 0 ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
   esac
 done
 
@@ -36,26 +39,26 @@ source "$REPO_ROOT/tools/lib.sh"
 
 require_macos
 
-if command -v git >/dev/null 2>&1; then :; else die "git is required"; fi
+if command -v git > /dev/null 2>&1; then :; else die "git is required"; fi
 
-if command -v git >/dev/null 2>&1 && git spice --version >/dev/null 2>&1; then
+if command -v git > /dev/null 2>&1 && git spice --version > /dev/null 2>&1; then
   log "git-spice already installed."
   exit 0
 fi
 
-if command -v brew >/dev/null 2>&1; then
+if command -v brew > /dev/null 2>&1; then
   # Prefer official tap per upstream docs
   if ! brew tap | grep -q "^abhinav/tap$"; then
     log "Adding tap: abhinav/tap"
     run "brew tap abhinav/tap"
   fi
-  if brew info abhinav/tap/git-spice >/dev/null 2>&1; then
+  if brew info abhinav/tap/git-spice > /dev/null 2>&1; then
     log "Installing via Homebrew: abhinav/tap/git-spice"
     run "brew install abhinav/tap/git-spice"
     exit 0
   fi
   # Fallback search if tap not available
-  if brew search --formula --exact git-spice >/dev/null 2>&1; then
+  if brew search --formula --exact git-spice > /dev/null 2>&1; then
     log "Installing via Homebrew formula: git-spice"
     run "brew install git-spice"
     exit 0

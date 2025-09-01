@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .PHONY: help plan diff test apply init update \
         bootstrap apply-dotfiles check fmt snapshot desired diff-dotfiles import import-apply \
-        prune-snapshots diff-open profile
+        prune-snapshots diff-open
 
 help:
 	@echo "Simple interface:"
@@ -25,9 +25,8 @@ help:
 	@echo "  import-apply - Apply updates from current system into repo"
 		@echo "  prune-snapshots        - Dry-run prune to keep last N snapshots (KEEP=N)"
 		@echo "  diff-open              - Open latest diff report in default viewer"
-		@echo "  profile PROFILE=<name> - Activate a profile and apply setup"
-		@echo "  home-git-init          - Init bare git in HOME (dry-run; use APPLY=1 to exec)"
-		@echo "  home-git-status        - Status of bare git in HOME"
+        @echo "  home-git-init          - Init bare git in HOME (dry-run; use APPLY=1 to exec)"
+        @echo "  home-git-status        - Status of bare git in HOME"
  
 
 # --- Simple interface ---
@@ -130,12 +129,6 @@ snapshots-clean:
 	@bash tools/prune_snapshots.sh ${KEEP:+--keep ${KEEP}} --apply || true
 
 # Activate a profile and apply the full setup
-profile:
-	@if [ -z "$(PROFILE)" ]; then echo "Usage: make profile PROFILE=<name>"; exit 2; fi
-	@bash tools/profile.sh activate "$(PROFILE)" --apply
-	@echo "[+] Profile activated: $(PROFILE)"
-	@$(MAKE) apply
-
 home-git-init:
 	@bash tools/home_git.sh init ${APPLY:+--apply} ${DIR:+--dir ${DIR}}
 

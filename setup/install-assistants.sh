@@ -38,13 +38,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 # shellcheck disable=SC1091
 source "$REPO_ROOT/tools/lib.sh"
 
-# Load active profile + profile-specific assistants env (so profiles can toggle installs)
-load_profile_env
-if [[ -n "${HS_PROFILE:-}" && -r "$REPO_ROOT/config/profiles/${HS_PROFILE}/assistants.env" ]]; then
-  # shellcheck disable=SC1090
-  source "$REPO_ROOT/config/profiles/${HS_PROFILE}/assistants.env"
-fi
-
 ONLY_SET=false
 while [[ $# -gt 0 ]]; do
   case "$1" in

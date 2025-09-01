@@ -33,8 +33,7 @@ Goal: validate `make plan/apply/test/diff` end-to-end on a clean macOS VM. Start
    - `make test` (skip-aware tests)
 6. Dry-run plan:
    - `make plan` (bundle check + stow preview)
-7. Apply base profile (idempotent):
-   - `make profile PROFILE=base`
+7. Apply setup (idempotent):
    - `make apply`
 8. Snapshot + diff report:
    - `make diff` then `make diff-open`
@@ -42,7 +41,7 @@ Goal: validate `make plan/apply/test/diff` end-to-end on a clean macOS VM. Start
 ## What to Verify
 - `brew bundle` succeeds; re-running is a no-op
 - macOS defaults applied; rerun `defaults.sh --dry-run` shows no surprises
-- Dotfiles stowed; overlays (if any) stacked correctly
+- Dotfiles stowed correctly
 - zsh starts clean; OMZ plugin loads without errors
 - `tmux` present and config loads
 
@@ -52,4 +51,3 @@ Goal: validate `make plan/apply/test/diff` end-to-end on a clean macOS VM. Start
 - Export artifacts (logs + `snapshots/diff/*/report.md`)
 
 Keep this minimal and reproducible; prefer native APIs over brittle GUI automation.
-

@@ -56,16 +56,10 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "lib: load_profile_env sets default HS_PROFILE=base" {
-  run bash -lc "H=\$(mktemp -d); mkdir -p \"\$H/.config/homesetup\"; export HOME=\"\$H\"; source '$LIB_PATH'; unset HS_PROFILE; load_profile_env; echo \"HS_PROFILE=\$HS_PROFILE\""
+@test "lib: load_profile_env is a no-op" {
+  run bash -lc "source '$LIB_PATH'; load_profile_env; echo ok"
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q "HS_PROFILE=base"
-}
-
-@test "lib: load_profile_env reads profile.env when present" {
-  run bash -lc "H=\$(mktemp -d); mkdir -p \"\$H/.config/homesetup\"; echo 'HS_PROFILE=wip' > \"\$H/.config/homesetup/profile.env\"; export HOME=\"\$H\"; source '$LIB_PATH'; unset HS_PROFILE; load_profile_env; echo \"HS_PROFILE=\$HS_PROFILE\""
-  [ "$status" -eq 0 ]
-  echo "$output" | grep -q "HS_PROFILE=wip"
+  echo "$output" | grep -q ok
 }
 
 @test "lib: resolve_path returns absolute path" {

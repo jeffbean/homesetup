@@ -16,14 +16,19 @@ Defaults to dry-run; pass --apply to actually remove.
 USAGE
 }
 
-for ((i=1; i<=$#; i++)); do
+for ((i = 1; i <= $#; i++)); do
   case "${!i}" in
     --keep)
-      j=$((i+1)); KEEP=${!j:-5};;
+      j=$((i + 1))
+      KEEP=${!j:-5}
+      ;;
     --apply)
-      DRY_RUN=false;;
-    -h|--help)
-      usage; exit 0;;
+      DRY_RUN=false
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
   esac
 done
 
@@ -47,11 +52,11 @@ prune_dir() { # (path)
     done <<< "$list"
   fi
   local count=${#all[@]}
-  (( count <= KEEP )) && return 0
+  ((count <= KEEP)) && return 0
   local start=0
-  local end=$((count-KEEP))
+  local end=$((count - KEEP))
   local idx
-  for (( idx=start; idx<end; idx++ )); do
+  for ((idx = start; idx < end; idx++)); do
     run rm -rf -- "$dir/${all[$idx]}"
   done
 }

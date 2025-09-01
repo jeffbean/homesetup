@@ -71,11 +71,6 @@ run defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
 run defaults write com.apple.screensaver askForPassword -int 1
 run defaults write com.apple.screensaver askForPasswordDelay -int 0
 
-# Profile-specific defaults (optional)
-load_profile_env
-if [[ -n "${HS_PROFILE:-}" && -r "$(dirname "$0")/defaults.d/${HS_PROFILE}.sh" ]]; then
-  # shellcheck disable=SC1090
-  source "$(dirname "$0")/defaults.d/${HS_PROFILE}.sh"
-fi
+## Profile-specific defaults removed for now to simplify setup
 
 echo "Done. Some changes may require logout/restart of apps."

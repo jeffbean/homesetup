@@ -11,26 +11,14 @@ source "$REPO_ROOT/tools/lib.sh"
 
 require_macos
 
-# Load active profile if present
-load_profile_env
+load_profile_env # no-op (profiles removed)
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/desired/$STAMP"
 mkdir -p "$OUT_DIR"
 
 # ---------- Brewfile parsing ----------
-# Compose Brewfile with profile extras if available
 BREWFILE="$(brewfile_path)"
-if [[ -n "${HS_PROFILE:-}" && -f "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra" ]]; then
-  TMP_COMPOSED="$REPO_ROOT/snapshots/logs/Brewfile.composed.$STAMP"
-  mkdir -p "$REPO_ROOT/snapshots/logs"
-  {
-    cat "$BREWFILE"
-    printf "\n# --- Profile: %s extras ---\n" "${HS_PROFILE}"
-    cat "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra"
-  } > "$TMP_COMPOSED"
-  BREWFILE="$TMP_COMPOSED"
-fi
 if [[ -f "$BREWFILE" ]]; then
   log "Parsing Brewfile…"
   # formulae
@@ -108,20 +96,6 @@ DESIRED_DOTFILES="$OUT_DIR/dotfiles_expected.tsv"
         printf "%s\t%s\t%s\n" "$pkgname" "$relpath" "$target"
       done < <(find "$pkg" -type f -not -path '*/.git/*' -not -name '.DS_Store' -print0)
     done
-    # Overlay packages for active profile
-    if [[ -n "$HS_PROFILE" && -d "$DOT_ROOT/overlays/$HS_PROFILE" ]]; then
-      for pkg in "$DOT_ROOT/overlays/$HS_PROFILE"/*; do
-        [[ -d "$pkg" ]] || continue
-        pkgname=$(basename "$pkg")
-        while IFS= read -r -d '' f; do
-          relpath=${f#"$pkg/"}
-          base="$(basename "$f")"
-          [[ "$base" == ".DS_Store" ]] && continue
-          target="$HOME/$relpath"
-          printf "%s\t%s\t%s\n" "$pkgname" "$relpath" "$target"
-        done < <(find "$pkg" -type f -not -path '*/.git/*' -not -name '.DS_Store' -print0)
-      done
-    fi
   fi
 } > "$DESIRED_DOTFILES"
 

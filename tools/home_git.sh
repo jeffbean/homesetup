@@ -41,15 +41,34 @@ source "$REPO_ROOT/tools/lib.sh"
 
 parse_args() {
   case "${1:-}" in
-    init|status|config) CMD="$1"; shift || true ;;
-    -h|--help|"") usage; exit 0 ;;
-    *) usage; echo "Unknown command: $1" >&2; exit 2 ;;
+    init | status | config)
+      CMD="$1"
+      shift || true
+      ;;
+    -h | --help | "")
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      echo "Unknown command: $1" >&2
+      exit 2
+      ;;
   esac
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --apply) DRY_RUN=false; shift ;;
-      --dir) DOT_GIT_DIR="${2:-$DOT_GIT_DIR}"; shift 2 ;;
-      *) echo "Ignoring arg: $1"; shift ;;
+      --apply)
+        DRY_RUN=false
+        shift
+        ;;
+      --dir)
+        DOT_GIT_DIR="${2:-$DOT_GIT_DIR}"
+        shift 2
+        ;;
+      *)
+        echo "Ignoring arg: $1"
+        shift
+        ;;
     esac
   done
 }
@@ -58,7 +77,8 @@ git_cmd() { GIT_DIR="$DOT_GIT_DIR" GIT_WORK_TREE="$WORKTREE" git "$@"; }
 
 do_init() {
   if [[ -d "$DOT_GIT_DIR" ]]; then
-    log "Bare repo already exists at $DOT_GIT_DIR"; return 0
+    log "Bare repo already exists at $DOT_GIT_DIR"
+    return 0
   fi
   run "git init --bare \"$DOT_GIT_DIR\""
   # Recommended configs
@@ -69,13 +89,14 @@ do_init() {
 
 do_status() {
   if [[ ! -d "$DOT_GIT_DIR" ]]; then
-    echo "Bare repo not found at $DOT_GIT_DIR"; return 1
+    echo "Bare repo not found at $DOT_GIT_DIR"
+    return 1
   fi
   git_cmd status -s || true
 }
 
 do_config() {
-  cat <<CFG
+  cat << CFG
 Recommended configuration (already applied by init):
   git --git-dir="$DOT_GIT_DIR" config core.worktree "$WORKTREE"
   git --git-dir="$DOT_GIT_DIR" config status.showUntrackedFiles no

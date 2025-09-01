@@ -58,8 +58,6 @@ if command -v codex > /dev/null 2>&1; then
   exit 0
 fi
 
-
-
 detect_method() {
   case "$METHOD" in
     brew)

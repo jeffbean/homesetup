@@ -6,7 +6,10 @@
 log() { printf "[+] %s\n" "$*"; }
 warn() { printf "[!] %s\n" "$*"; }
 error() { printf "[x] %s\n" "$*" >&2; }
-die() { error "$@"; exit 1; }
+die() {
+  error "$@"
+  exit 1
+}
 
 # Confirm helper (respects AUTO_YES=true)
 confirm() {
@@ -40,14 +43,8 @@ run() {
   fi
 }
 
-# Load active profile env if present (sets HS_PROFILE if missing)
-load_profile_env() {
-  if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-    # shellcheck disable=SC1091
-    source "$HOME/.config/homesetup/profile.env"
-  fi
-  : "${HS_PROFILE:=base}"
-}
+# (profiles removed) — no-op retained for compatibility
+load_profile_env() { :; }
 
 # Return the path to the Brewfile used as setup input.
 # Resolution order:
@@ -65,17 +62,23 @@ brewfile_path() {
     return 0
   fi
   local cfg="$root/config/Brewfile"
-  if [[ -f "$cfg" ]]; then echo "$cfg"; return 0; fi
-  if [[ -f "$root/Brewfile" ]]; then echo "$root/Brewfile"; return 0; fi
+  if [[ -f "$cfg" ]]; then
+    echo "$cfg"
+    return 0
+  fi
+  if [[ -f "$root/Brewfile" ]]; then
+    echo "$root/Brewfile"
+    return 0
+  fi
   echo "$cfg" # preferred canonical path even if missing
 }
 
 # Resolve a path to absolute form (best-effort, portable)
 resolve_path() {
   local p="$1"
-  if command -v realpath >/dev/null 2>&1; then
-    realpath "$p" 2>/dev/null || echo "$p"
-  elif command -v python3 >/dev/null 2>&1; then
+  if command -v realpath > /dev/null 2>&1; then
+    realpath "$p" 2> /dev/null || echo "$p"
+  elif command -v python3 > /dev/null 2>&1; then
     python3 - "$p" << 'PY'
 import os,sys
 p=sys.argv[1]

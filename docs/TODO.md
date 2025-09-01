@@ -58,7 +58,7 @@ Keep items small, idempotent, and testable. Prefer inputs under `config/` and th
 ## Roadmap (Bigger Items)
 - [ ] Design Go CLI (command surface + data model)
   - [ ] Plan/diff/apply parity with shell
-  - [ ] Consume inputs from `config/` (profiles, Brewfile)
+  - [ ] Consume inputs from `config/` (Brewfile)
   - [ ] Replace shell orchestration gradually
 - [ ] macOS VM integration tests
   - [ ] Script/automation to bring up a macOS VM (e.g., Anka, UTM, or Apple Silicon virtualize if feasible)

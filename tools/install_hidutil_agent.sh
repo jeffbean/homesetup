@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat <<'USAGE'
+  cat << 'USAGE'
 install_hidutil_agent.sh [--remove]
 
 Install (or remove) a LaunchAgent to apply hidutil mappings at login.
@@ -26,9 +26,18 @@ require_macos
 DO_REMOVE=false
 while (("$#")); do
   case "$1" in
-    --remove) DO_REMOVE=true; shift ;;
-    -h|--help) usage; exit 0 ;;
-    *) warn "Ignoring unknown arg: $1"; shift ;;
+    --remove)
+      DO_REMOVE=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      warn "Ignoring unknown arg: $1"
+      shift
+      ;;
   esac
 done
 
@@ -62,6 +71,6 @@ escaped_root=${REPO_ROOT//\//\/}
 sed "s/__REPO_ROOT__/$escaped_root/g" "$PLIST_TEMPLATE" > "$DEST_PLIST"
 
 log "Loading LaunchAgent: $DEST_PLIST"
-launchctl unload "$DEST_PLIST" 2>/dev/null || true
+launchctl unload "$DEST_PLIST" 2> /dev/null || true
 launchctl load -w "$DEST_PLIST"
 log "Installed and loaded. It will apply your mapping at login."

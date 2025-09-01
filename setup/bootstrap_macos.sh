@@ -23,8 +23,6 @@ Flags:
 USAGE
 }
 
-# Load active profile if present (PROMPT_FLAVOR, HS_PROFILE, etc.)
-load_profile_env
 
 AUTO_YES=false
 DO_BUNDLE=true
@@ -75,18 +73,8 @@ if [[ "$DO_BUNDLE" == "true" ]]; then
   BF="$(brewfile_path)"
   if [[ -f "$BF" ]]; then
     log "Applying Brewfile (brew bundle)…"
-    # Compose Brewfile with profile extras if available
-    BASE_BREWFILE="$BF"
-    COMPOSED_BREWFILE="$BASE_BREWFILE"
-    if [[ -n "${HS_PROFILE:-}" && -f "config/profiles/${HS_PROFILE}/Brewfile.extra" ]]; then
-      COMPOSED_BREWFILE="snapshots/logs/Brewfile.composed.$(date +%Y%m%d-%H%M%S)"
-      mkdir -p "snapshots/logs"
-      {
-        cat "$BASE_BREWFILE"
-        printf "\n# --- Profile: %s extras ---\n" "${HS_PROFILE}"
-        cat "config/profiles/${HS_PROFILE}/Brewfile.extra"
-      } > "$COMPOSED_BREWFILE"
-    fi
+    # No profile composition; use config/Brewfile directly
+    COMPOSED_BREWFILE="$BF"
     # Preview/check, then install without upgrading. Capture verbose logs.
     TS="$(date +%Y%m%d-%H%M%S)"
     LOG_DIR="snapshots/logs"
