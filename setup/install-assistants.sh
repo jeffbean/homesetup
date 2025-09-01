@@ -33,7 +33,7 @@ USAGE
 
 # Load active profile + profile-specific assistants env (so profiles can toggle installs)
 if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   source "$HOME/.config/homesetup/profile.env"
 fi
  : "${HS_PROFILE:=base}"

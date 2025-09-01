@@ -33,7 +33,7 @@ USAGE
 
 # Load active profile if present (PROMPT_FLAVOR, HS_PROFILE, etc.)
 if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   source "$HOME/.config/homesetup/profile.env"
 fi
 : "${HS_PROFILE:=base}"
@@ -93,7 +93,7 @@ if [[ "$DO_BUNDLE" == "true" ]]; then
       mkdir -p "snapshots/logs"
       {
         cat Brewfile
-        echo "\n# --- Profile: ${HS_PROFILE} extras ---"
+        printf "\n# --- Profile: %s extras ---\n" "${HS_PROFILE}"
         cat "config/profiles/${HS_PROFILE}/Brewfile.extra"
       } > "$COMPOSED_BREWFILE"
     fi

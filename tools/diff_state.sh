@@ -29,7 +29,7 @@ section() {
 
 echo "macOS setup diff report" > "$REPORT"
 if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   source "$HOME/.config/homesetup/profile.env"
 fi
  : "${HS_PROFILE:=base}"
@@ -47,27 +47,28 @@ else : > "$OUT_DIR/_cur_brew.txt"; fi
 if [[ -f "$DES_DIR/desired_brew_formulae.txt" ]]; then
   sort -u "$DES_DIR/desired_brew_formulae.txt" > "$OUT_DIR/_des_brew.txt"
 else : > "$OUT_DIR/_des_brew.txt"; fi
-# Compute dependency closure of desired formulae (runtime deps only)
+# Compute dependency closure of desired formulae (runtime deps only), unless HS_FAST set
 : > "$OUT_DIR/_des_brew_closure.txt"
-if command -v brew >/dev/null 2>&1; then
-  if [[ -s "$OUT_DIR/_des_brew.txt" ]]; then
-    # Use union to get combined deps; ignore errors for missing formulae
-    while IFS= read -r f; do
-      [[ -n "$f" ]] || continue
-      brew deps --union "$f" 2>/dev/null || true
-    done < "$OUT_DIR/_des_brew.txt" | sort -u > "$OUT_DIR/_des_brew_closure.txt" || true
+if [[ "${HS_FAST:-}" != "1" && "${HS_FAST:-}" != "true" ]]; then
+  if command -v brew >/dev/null 2>&1; then
+    if [[ -s "$OUT_DIR/_des_brew.txt" ]]; then
+      while IFS= read -r f; do
+        [[ -n "$f" ]] || continue
+        brew deps --union "$f" 2>/dev/null || true
+      done < "$OUT_DIR/_des_brew.txt" | sort -u > "$OUT_DIR/_des_brew_closure.txt" || true
+    fi
   fi
 fi
-# Also include formulas that are dependencies of desired casks (best-effort)
+# Also include formulas that are dependencies of desired casks (best-effort), unless HS_FAST
 : > "$OUT_DIR/_des_cask_formula_deps.txt"
-if command -v brew >/dev/null 2>&1; then
-  if [[ -f "$DES_DIR/desired_brew_casks.txt" && -s "$DES_DIR/desired_brew_casks.txt" ]]; then
-    while IFS= read -r c; do
-      [[ -n "$c" ]] || continue
-      # Try JSON first (no jq); fallback to plain text parsing
-      if info=$(brew info --cask --json=v2 "$c" 2>/dev/null); then
-        if command -v python3 >/dev/null 2>&1; then
-          python3 - <<PY 2>/dev/null || true
+if [[ "${HS_FAST:-}" != "1" && "${HS_FAST:-}" != "true" ]]; then
+  if command -v brew >/dev/null 2>&1; then
+    if [[ -f "$DES_DIR/desired_brew_casks.txt" && -s "$DES_DIR/desired_brew_casks.txt" ]]; then
+      while IFS= read -r c; do
+        [[ -n "$c" ]] || continue
+        if info=$(brew info --cask --json=v2 "$c" 2>/dev/null); then
+          if command -v python3 >/dev/null 2>&1; then
+            python3 - <<PY 2>/dev/null || true
 import json,sys
 try:
   data=json.load(sys.stdin)
@@ -76,13 +77,14 @@ try:
 except Exception:
   pass
 PY
+          else
+            echo "$info" | sed -nE 's/.*"formula":\[(.*)\].*/\1/p' | sed 's/\"//g; s/,/\n/g' | sed 's/^ *//; s/ *$//' || true
+          fi <<< "$info"
         else
-          echo "$info" | sed -nE 's/.*"formula":\[(.*)\].*/\1/p' | sed 's/\"//g; s/,/\n/g' | sed 's/^ *//; s/ *$//' || true
-        fi <<< "$info"
-      else
-        brew info --cask "$c" 2>/dev/null | sed -nE 's/^Depends on: (.*)/\1/p' | tr ',' '\n' | awk '{print $1}' || true
-      fi
-    done < "$DES_DIR/desired_brew_casks.txt" | sed -e '/^$/d' | sort -u > "$OUT_DIR/_des_cask_formula_deps.txt" || true
+          brew info --cask "$c" 2>/dev/null | sed -nE 's/^Depends on: (.*)/\1/p' | tr ',' '\n' | awk '{print $1}' || true
+        fi
+      done < "$DES_DIR/desired_brew_casks.txt" | sed -e '/^$/d' | sort -u > "$OUT_DIR/_des_cask_formula_deps.txt" || true
+    fi
   fi
 fi
 # Allowed set = desired top-level + their dependencies + cask formula deps

@@ -16,7 +16,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
 # Load active profile if present
 if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   source "$HOME/.config/homesetup/profile.env"
 fi
 : "${HS_PROFILE:=base}"
@@ -31,7 +31,11 @@ BREWFILE="$REPO_ROOT/Brewfile"
 if [[ -n "${HS_PROFILE:-}" && -f "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra" ]]; then
   TMP_COMPOSED="$REPO_ROOT/snapshots/logs/Brewfile.composed.$STAMP"
   mkdir -p "$REPO_ROOT/snapshots/logs"
-  { cat "$REPO_ROOT/Brewfile"; echo "\n# --- Profile: ${HS_PROFILE} extras ---"; cat "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra"; } > "$TMP_COMPOSED"
+  {
+    cat "$REPO_ROOT/Brewfile"
+    printf "\n# --- Profile: %s extras ---\n" "${HS_PROFILE}"
+    cat "$REPO_ROOT/config/profiles/${HS_PROFILE}/Brewfile.extra"
+  } > "$TMP_COMPOSED"
   BREWFILE="$TMP_COMPOSED"
 fi
 if [[ -f "$BREWFILE" ]]; then

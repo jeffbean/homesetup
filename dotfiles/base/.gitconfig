@@ -22,3 +22,5 @@
 # Personal details go in ~/.gitconfig.local (not tracked)
 [includeIf "exists:~/.gitconfig.local"]
 	path = ~/.gitconfig.local
+[user]
+	email = jeffbean@users.noreply.github.com

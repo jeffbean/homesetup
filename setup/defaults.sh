@@ -75,7 +75,7 @@ run defaults write com.apple.screensaver askForPasswordDelay -int 0
 
 # Profile-specific defaults (optional)
 if [[ -r "$HOME/.config/homesetup/profile.env" ]]; then
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   source "$HOME/.config/homesetup/profile.env"
 fi
 : "${HS_PROFILE:=base}"

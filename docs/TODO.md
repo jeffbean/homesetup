@@ -27,13 +27,14 @@ This is a living roadmap for refining and maintaining the local setup. Keep item
 - [x] Dock: size/magnify, autohide, remove recents
 - [x] Trackpad/Mouse: tap-to-click, three‑finger drag, natural scrolling
 - [x] Screenshots: set default dir to `~/Pictures/Screenshots`
-- [ ] Safari/Privacy: disable auto-open safe downloads, tracking prevention, show full URL
-- [ ] Sleep/Password: require password after sleep/wake
+- [ ] Safari/Privacy: disable auto-open safe downloads, tracking prevention, show full URL (de-scoped for now)
+- [ ] Sleep/Password: require password after sleep/wake (de-scoped for now)
 - [x] Tests: read‑only/presence checks in `tests/defaults/`
 
 ## Homebrew: Apps, Fonts, CLIs
 - [x] Developer CLIs: `fzf`, `ripgrep`, `fd`, `eza`, `bat`, `tree`, `gnu-sed`, `gnu-tar`
-- [ ] Terminal + Fonts: `iterm2` (or `alacritty`), `font-jetbrains-mono-nerd-font`
+- [x] Fonts: `font-jetbrains-mono-nerd-font`
+- [ ] Terminal emulator: none (using built-in Terminal); focus on `tmux` workflow
 - [ ] Utilities: `AltTab`, `Raycast`/`Alfred` (pick one)
 - [x] 1Password + CLI (for secrets and automation)
 - [ ] MAS entries for required Apple apps (ids pinned in Brewfile)
