@@ -5,7 +5,7 @@
     skip "Homebrew not installed"
   fi
   # Do not assert status; just run to surface output
-  run brew bundle check --file=Brewfile
+  BF=$(bash -lc "source tools/lib.sh; brewfile_path")
+  run brew bundle check --file="$BF"
   [ -n "$output" ] || true
 }
-
