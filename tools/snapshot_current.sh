@@ -11,6 +11,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 source "$REPO_ROOT/tools/lib.sh"
 
 require_macos
+load_profile_env
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/$STAMP"
@@ -90,6 +91,8 @@ DOT_ROOT="$REPO_ROOT/dotfiles"
         target="$HOME/$relpath"
         state="missing"
         link_target=""
+        base="$(basename "$f")"
+        [[ "$base" == ".DS_Store" ]] && continue
         if [[ -L "$target" ]]; then
           lt=$(readlink "$target" || true)
           link_target="$lt"
@@ -107,6 +110,35 @@ DOT_ROOT="$REPO_ROOT/dotfiles"
         printf "%s\t%s\t%s\t%s\t%s\n" "$pkgname" "$relpath" "$state" "$target" "$link_target"
       done < <(find "$pkg" -type f -not -path '*/.git/*' -not -name '.DS_Store' -print0)
     done
+    # Include overlays for the active profile, if present
+    if [[ -n "$HS_PROFILE" && -d "$DOT_ROOT/overlays/$HS_PROFILE" ]]; then
+      for pkg in "$DOT_ROOT/overlays/$HS_PROFILE"/*; do
+        [[ -d "$pkg" ]] || continue
+        pkgname=$(basename "$pkg")
+        while IFS= read -r -d '' f; do
+          relpath=${f#"$pkg/"}
+          target="$HOME/$relpath"
+          state="missing"
+          link_target=""
+          base="$(basename "$f")"
+          [[ "$base" == ".DS_Store" ]] && continue
+          if [[ -L "$target" ]]; then
+            lt=$(readlink "$target" || true)
+            link_target="$lt"
+            if [[ "$(resolve_path "$target")" == "$(resolve_path "$f")" ]]; then
+              state="linked_ok"
+            else
+              state="symlink_other"
+            fi
+          elif [[ -e "$target" ]]; then
+            if [[ -d "$target" ]]; then state="conflict_dir"; else state="conflict_file"; fi
+          else
+            state="missing"
+          fi
+          printf "%s\t%s\t%s\t%s\t%s\n" "$pkgname" "$relpath" "$state" "$target" "$link_target"
+        done < <(find "$pkg" -type f -not -path '*/.git/*' -not -name '.DS_Store' -print0)
+      done
+    fi
   fi
 } > "$OUT_DIR/dotfiles_status.tsv"
 

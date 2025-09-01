@@ -102,10 +102,26 @@ DESIRED_DOTFILES="$OUT_DIR/dotfiles_expected.tsv"
       pkgname=$(basename "$pkg")
       while IFS= read -r -d '' f; do
         relpath=${f#"$pkg/"}
+        base="$(basename "$f")"
+        [[ "$base" == ".DS_Store" ]] && continue
         target="$HOME/$relpath"
         printf "%s\t%s\t%s\n" "$pkgname" "$relpath" "$target"
       done < <(find "$pkg" -type f -not -path '*/.git/*' -not -name '.DS_Store' -print0)
     done
+    # Overlay packages for active profile
+    if [[ -n "$HS_PROFILE" && -d "$DOT_ROOT/overlays/$HS_PROFILE" ]]; then
+      for pkg in "$DOT_ROOT/overlays/$HS_PROFILE"/*; do
+        [[ -d "$pkg" ]] || continue
+        pkgname=$(basename "$pkg")
+        while IFS= read -r -d '' f; do
+          relpath=${f#"$pkg/"}
+          base="$(basename "$f")"
+          [[ "$base" == ".DS_Store" ]] && continue
+          target="$HOME/$relpath"
+          printf "%s\t%s\t%s\n" "$pkgname" "$relpath" "$target"
+        done < <(find "$pkg" -type f -not -path '*/.git/*' -not -name '.DS_Store' -print0)
+      done
+    fi
   fi
 } > "$DESIRED_DOTFILES"
 

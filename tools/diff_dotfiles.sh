@@ -10,6 +10,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 source "$REPO_ROOT/tools/lib.sh"
 
 require_macos
+load_profile_env
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT_DIR="$REPO_ROOT/snapshots/diff/$STAMP"
@@ -26,13 +27,14 @@ DOT_ROOT="$REPO_ROOT/dotfiles"
 changes=0
 
 shopt -s nullglob
-for pkg in "$DOT_ROOT"/*; do
-  [[ -d "$pkg" ]] || continue
-  pkgname=$(basename "$pkg")
+  for pkg in "$DOT_ROOT"/*; do
+    [[ -d "$pkg" ]] || continue
+    pkgname=$(basename "$pkg")
   while IFS= read -r -d '' src; do
     rel=${src#"$pkg/"}
     # skip macOS cruft
-    [[ "$(basename "$src")" == ".DS_Store" ]] && continue
+    base="$(basename "$src")"
+    [[ "$base" == ".DS_Store" ]] && continue
     dest="$HOME/$rel"
     label_src="repo:$pkgname/$rel"
     label_dst="home:$dest"
@@ -54,6 +56,37 @@ for pkg in "$DOT_ROOT"/*; do
     fi
   done < <(find "$pkg" -type f -not -path '*/.git/*' -print0)
 done
+
+# Include overlay packages for the active profile
+if [[ -n "$HS_PROFILE" && -d "$DOT_ROOT/overlays/$HS_PROFILE" ]]; then
+  for pkg in "$DOT_ROOT/overlays/$HS_PROFILE"/*; do
+    [[ -d "$pkg" ]] || continue
+    pkgname=$(basename "$pkg")
+    while IFS= read -r -d '' src; do
+      rel=${src#"$pkg/"}
+      base="$(basename "$src")"
+      [[ "$base" == ".DS_Store" ]] && continue
+      dest="$HOME/$rel"
+      label_src="repo:$pkgname/$rel"
+      label_dst="home:$dest"
+      if [[ -e "$dest" || -L "$dest" ]]; then
+        if cmp -s "$src" "$dest"; then
+          continue
+        else
+          echo "diff -u $label_src $label_dst" >> "$PATCH"
+          diff -u --label "$label_src" --label "$label_dst" "$src" "$dest" >> "$PATCH" || true
+          echo >> "$PATCH"
+          changes=$((changes + 1))
+        fi
+      else
+        echo "diff -u $label_src $label_dst (new file)" >> "$PATCH"
+        diff -u --label "$label_src" --label "$label_dst" /dev/null "$src" >> "$PATCH" || true
+        echo >> "$PATCH"
+        changes=$((changes + 1))
+      fi
+    done < <(find "$pkg" -type f -not -path '*/.git/*' -print0)
+  done
+fi
 
 if [[ $changes -eq 0 ]]; then
   echo "No dotfile content differences found." > "$PATCH"
