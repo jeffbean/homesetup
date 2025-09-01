@@ -56,9 +56,10 @@ Keep items small, idempotent, and testable. Prefer inputs under `config/` and th
 - [ ] Make target: `snapshots-clean N` (script exists; keep minimal entrypoints)
 
 ## Roadmap (Bigger Items)
-- [ ] Migrate orchestration to Go CLI (cmd/homesetup)
-  - [ ] Reimplement `generate_desired`, `diff_state`, `snapshot_current`
-  - [ ] Keep shell as thin wrappers during transition
+- [ ] Design Go CLI (command surface + data model)
+  - [ ] Plan/diff/apply parity with shell
+  - [ ] Consume inputs from `config/` (profiles, Brewfile)
+  - [ ] Replace shell orchestration gradually
 - [ ] macOS VM integration tests
   - [ ] Script/automation to bring up a macOS VM (e.g., Anka, UTM, or Apple Silicon virtualize if feasible)
   - [ ] Run `make init` and verify idempotence (`make update`)

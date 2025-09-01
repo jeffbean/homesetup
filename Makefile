@@ -28,8 +28,7 @@ help:
 		@echo "  profile PROFILE=<name> - Activate a profile and apply setup"
 		@echo "  home-git-init          - Init bare git in HOME (dry-run; use APPLY=1 to exec)"
 		@echo "  home-git-status        - Status of bare git in HOME"
-		@echo "  go-build               - Build Go CLI (homesetup) if Go available"
-		@echo "  go-run CMD=<cmd>       - Run Go CLI (e.g., CMD=plan)"
+ 
 
 # --- Simple interface ---
 
@@ -143,15 +142,7 @@ home-git-init:
 home-git-status:
 	@bash tools/home_git.sh status ${DIR:+--dir ${DIR}} || true
 
-go-build:
-	@if command -v go >/dev/null 2>&1; then \
-	  go build ./cmd/homesetup ; \
-	else echo "Go not installed"; fi
-
-go-run:
-	@if command -v go >/dev/null 2>&1; then \
-	  go run ./cmd/homesetup $(CMD) ; \
-	else echo "Go not installed"; fi
+### Go CLI targets removed for now; design is on the roadmap
 
 import:
 	@bash tools/import_current.sh

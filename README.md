@@ -56,7 +56,7 @@ Switch in one command:
   - `overlays/<profile>/` for profile‑specific files layered on top
 - `setup/` — macOS bootstrap scripts (temporary until Go CLI replaces)
 - `tools/` — thin orchestration + shared `lib.sh` helpers (entrypoint scripts)
-- `cmd/` — Go CLI (WIP): plan/diff/apply with profiles and inputs
+- Go CLI: planned future work to replace shell orchestration while keeping inputs under `config/`.
 - `tests/` — bats tests for scripts and defaults
 - `snapshots/` — artifacts: current/desired state and diffs
 - `docs/` — notes and procedures
