@@ -2,16 +2,15 @@
 
 This repo provisions and maintains a healthy macOS setup for a personal machine. It’s idempotent and safe to re‑run.
 
-Built with a mix of pragmatic shell and as much AI assistance as is sane — all changes remain small, testable, and reversible.
+AI Experiment
+- This repo is essentially fully coded with Codex as my next AI experiment. I use Codex for everything in this repo as an experiment.
 
 ## Quick Start
 
 - Clone the repo and review `config/Brewfile`.
 - Install packages: `make brew`
-- Link dotfiles: `make apply-dotfiles`
+- Link dotfiles and reload tmux/zsh: `make apply`
 
-## Profiles
-Profiles and overlays were removed to simplify the core plan/diff engine. We may reintroduce them later.
 
 ## What it does
 
@@ -35,14 +34,16 @@ You can use the tiny Go CLI instead of Make targets:
 
 ## Repository Layout
 
-- `config/` — Inputs to the setup (no secrets)
-  - `Brewfile`: Homebrew formulae/casks and MAS apps (source of truth)
-- `*.example` configs for tools (ssh, gpg-agent, starship, hidutil, etc.)
-- `dotfiles/` — Dotfile packages to be stowed into `$HOME`
-- `setup/`, `tools/`, `tests/` — removed to simplify; focus on `config/` + `dotfiles/`
-- `docs/` — notes and procedures
+- `config/`
+  - `Brewfile`: Homebrew formulae/casks and MAS apps
+  - `examples/`: example configs (ssh, gpg-agent, starship, etc.)
+- `dotfiles/`: stow packages (e.g., `base`, `zsh`)
+- `cmd/homesetup`: Go CLI entrypoint
+- `internal/actions`: Go actions (plan/apply/brew)
+- `bin/`: optional build output (`make build`)
+- `.github/workflows/ci.yml`: Go build + lint CI
 
-Top level stays minimal: a Makefile that delegates to `tools/` and eventually the Go CLI.
+Top level stays minimal: a Makefile that delegates to the Go CLI.
 
 ## Design Principles (Expandable)
 
@@ -62,7 +63,7 @@ Top level stays minimal: a Makefile that delegates to `tools/` and eventually th
 
 - Shared git config: `dotfiles/base/.gitconfig` (aliases, shared settings)
 - Personal overrides: `~/.gitconfig.local` (see `config/examples/gitconfig.local`)
-- Local overrides: files ending in `*.local` (e.g., `~/.zshrc.local`) are never linked or tracked. They’re user-specific. We ship a Stow ignore (`dotfiles/.stow-global-ignore`) and skip them in diff/desired tools.
+- Local overrides: files ending in `*.local` (e.g., `~/.zshrc.local`) are user-specific. We ship a Stow ignore (`dotfiles/.stow-global-ignore`).
 - Never commit secrets. 1Password and 1Password CLI are installed via Brewfile; use them for secrets in automation.
 
 ## Contributing

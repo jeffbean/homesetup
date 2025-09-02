@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help brew apply-dotfiles plan apply build
+.PHONY: help brew apply-dotfiles plan apply build lint fmt
 
 help:
 	@echo "Simple commands:"
@@ -9,6 +9,8 @@ help:
 	@echo "  apply-dotfiles  - Stow dotfiles/* packages into \"$$HOME\""
 	@echo "  apply           - Stow dotfiles and reload tmux + zsh"
 	@echo "  build           - Build Go CLI to ./bin/homesetup"
+	@echo "  lint            - go vet + gofmt check + go test"
+	@echo "  fmt             - go fmt ./..."
 
 brew:
 	@if [ -x bin/homesetup ]; then bin/homesetup brew; \
@@ -36,3 +38,15 @@ build:
 	  go build -o bin/homesetup ./cmd/homesetup; \
 	  echo "[+] Built ./bin/homesetup"; \
 	else echo "Go not installed"; fi
+
+lint:
+	@set -e; \
+	if command -v go >/dev/null 2>&1; then \
+	  echo "[+] go vet"; go vet ./...; \
+	  echo "[+] gofmt check"; FMT=$$(gofmt -l . | grep -E '\\.go$$' || true); \
+	  if [ -n "$$FMT" ]; then echo "gofmt issues:"; echo "$$FMT"; exit 1; fi; \
+	  echo "[+] go test"; go test ./...; \
+	else echo "Go not installed"; exit 1; fi
+
+fmt:
+	@if command -v go >/dev/null 2>&1; then go fmt ./...; else echo "Go not installed"; fi
