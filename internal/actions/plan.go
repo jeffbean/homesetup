@@ -1,10 +1,10 @@
 package actions
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
+    "os"
+    "os/exec"
+    "path/filepath"
+    "log/slog"
 )
 
 func brewfile() string {
@@ -23,29 +23,38 @@ func run(name string, args ...string) error {
 }
 
 func Plan() error {
-	fmt.Println("[+] Homebrew dry-run (bundle check)")
-	bf := brewfile()
-	if _, err := os.Stat(bf); err == nil {
-		_ = run("brew", "bundle", "check", "--file="+bf)
-	} else {
-		fmt.Printf("Brewfile not found: %s\n", bf)
-	}
-	fmt.Println("---")
-	fmt.Println("[+] Dotfiles stow preview (no changes)")
-	if _, err := exec.LookPath("stow"); err == nil {
-		if _, err := os.Stat("dotfiles"); err == nil {
-			entries, _ := os.ReadDir("dotfiles")
-			for _, e := range entries {
-				if e.IsDir() {
-					fmt.Printf("Preview: %s\n", e.Name())
-					_ = run("stow", "-nvt", os.Getenv("HOME"), "-d", "dotfiles", e.Name())
-				}
-			}
-		} else {
-			fmt.Println("dotfiles directory not found")
-		}
-	} else {
-		fmt.Println("stow not installed (brew install stow)")
-	}
-	return nil
+    bf := brewfile()
+    if _, err := os.Stat(bf); err == nil {
+        if err := run("brew", "bundle", "check", "--file="+bf); err != nil {
+            slog.Warn("brew bundle check failed", slog.String("file", bf), slog.Any("err", err))
+        } else {
+            slog.Info("brew bundle check", slog.String("file", bf))
+        }
+    } else {
+        slog.Warn("Brewfile not found", slog.String("file", bf))
+    }
+
+    if _, err := exec.LookPath("stow"); err == nil {
+        if _, err := os.Stat("dotfiles"); err == nil {
+            entries, rerr := os.ReadDir("dotfiles")
+            if rerr != nil {
+                slog.Error("read dotfiles dir", slog.Any("err", rerr))
+                return rerr
+            }
+            for _, e := range entries {
+                if e.IsDir() {
+                    pkg := e.Name()
+                    slog.Info("stow preview", slog.String("package", pkg))
+                    if err := run("stow", "-nvt", os.Getenv("HOME"), "-d", "dotfiles", pkg); err != nil {
+                        slog.Warn("stow preview failed", slog.String("package", pkg), slog.Any("err", err))
+                    }
+                }
+            }
+        } else {
+            slog.Warn("dotfiles directory not found")
+        }
+    } else {
+        slog.Warn("stow not installed (brew install stow)")
+    }
+    return nil
 }

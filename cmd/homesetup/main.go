@@ -1,10 +1,11 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"homesetup/internal/actions"
-	"os"
+    "flag"
+    "fmt"
+    "homesetup/internal/actions"
+    "log/slog"
+    "os"
 )
 
 func usage() {
@@ -12,9 +13,11 @@ func usage() {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		usage()
-		return
+    // setup default slog logger (text to stderr)
+    slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{})))
+    if len(os.Args) < 2 {
+        usage()
+        return
 	}
 	cmd := os.Args[1]
 	fs := flag.NewFlagSet(cmd, flag.ExitOnError)

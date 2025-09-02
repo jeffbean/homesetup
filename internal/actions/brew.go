@@ -1,18 +1,23 @@
 package actions
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
+    "os"
+    "os/exec"
+    "log/slog"
 )
 
 func BrewInstall() error {
-	if _, err := exec.LookPath("brew"); err != nil {
-		return fmt.Errorf("Homebrew not installed")
-	}
-	bf := brewfile()
-	if _, err := os.Stat(bf); err != nil {
-		return fmt.Errorf("Brewfile not found: %s", bf)
-	}
-	return run("brew", "bundle", "--file="+bf)
+    if _, err := exec.LookPath("brew"); err != nil {
+        return err
+    }
+    bf := brewfile()
+    if _, err := os.Stat(bf); err != nil {
+        return err
+    }
+    if err := run("brew", "bundle", "--file="+bf); err != nil {
+        slog.Error("brew bundle failed", slog.String("file", bf), slog.Any("err", err))
+        return err
+    }
+    slog.Info("brew bundle applied", slog.String("file", bf))
+    return nil
 }
