@@ -1,3 +1,15 @@
+# Minimal error helper if not already present
+if ! typeset -f display_error >/dev/null 2>&1; then
+  display_error() {
+    # Print message to stderr in red, fallback plain if not TTY
+    if [ -t 2 ]; then
+      printf "\033[31m%s\033[0m\n" "$*" >&2
+    else
+      printf "%s\n" "$*" >&2
+    fi
+  }
+fi
+
 gsnb() {
   if [ $# -eq 0 ]; then
     display_error "Usage: gspnew <branch title sentence>"
