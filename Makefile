@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help brew apply-dotfiles plan apply
+.PHONY: help brew apply-dotfiles plan apply build
 
 help:
 	@echo "Simple commands:"
@@ -8,6 +8,7 @@ help:
 	@echo "  brew            - Install packages from config/Brewfile (or HS_BREWFILE)"
 	@echo "  apply-dotfiles  - Stow dotfiles/* packages into \"$$HOME\""
 	@echo "  apply           - Stow dotfiles and reload tmux + zsh"
+	@echo "  build           - Build Go CLI to ./bin/homesetup"
 
 brew:
 	@if command -v brew >/dev/null 2>&1; then \
@@ -46,3 +47,10 @@ plan:
 	    done; \
 	  else echo "dotfiles directory not found"; fi; \
 	else echo "stow not installed (brew install stow)"; fi
+
+build:
+	@mkdir -p bin
+	@if command -v go >/dev/null 2>&1; then \
+	  go build -o bin/homesetup ./cmd/homesetup; \
+	  echo "[+] Built ./bin/homesetup"; \
+	else echo "Go not installed"; fi

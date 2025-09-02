@@ -36,6 +36,9 @@ snapshots/
 # Local Go build artifact
 /homesetup
 
+# Go build output
+/bin/
+
 # Ignore backup artifacts
 *.backup.*
 
