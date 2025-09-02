@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help brew apply-dotfiles plan apply build lint fmt
+.PHONY: help brew apply-dotfiles plan apply build lint fmt devpod-up devpod-shell devpod-down lint fmt
 
 help:
 	@echo "Simple commands:"
@@ -11,6 +11,9 @@ help:
 	@echo "  build           - Build Go CLI to ./bin/homesetup"
 	@echo "  lint            - go vet + gofmt check + go test"
 	@echo "  fmt             - go fmt ./..."
+	@echo "  devpod-up       - Build image, start devpod and stow"
+	@echo "  devpod-shell    - Open a zsh shell inside devpod"
+	@echo "  devpod-down     - Stop and remove devpod"
 
 brew:
 	@if [ -x bin/homesetup ]; then bin/homesetup brew; \
@@ -50,3 +53,19 @@ lint:
 
 fmt:
 	@if command -v go >/dev/null 2>&1; then go fmt ./...; else echo "Go not installed"; fi
+
+
+devpod-up: build
+	@if [ -x bin/homesetup ]; then bin/homesetup devpod up; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup devpod up; \
+	else echo "Build CLI with 'make build' or install Go."; fi
+
+devpod-shell:
+	@if [ -x bin/homesetup ]; then bin/homesetup devpod shell; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup devpod shell; \
+	else echo "Build CLI with 'make build' or install Go."; fi
+
+devpod-down:
+	@if [ -x bin/homesetup ]; then bin/homesetup devpod down; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup devpod down; \
+	else echo "Build CLI with 'make build' or install Go."; fi

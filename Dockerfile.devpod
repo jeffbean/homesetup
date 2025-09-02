@@ -1,0 +1,41 @@
+# syntax=docker/dockerfile:1
+FROM debian:stable-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    HOME=/home/dev \
+    SHELL=/usr/bin/zsh
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    ca-certificates curl git zsh tmux stow make \
+    gcc g++ build-essential \
+    wget gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Optional: install Go (minimal)
+ENV GOVERSION=1.22.5
+RUN arch=$(dpkg --print-architecture) && \
+    case "$arch" in \
+      amd64) GOARCH=amd64 ;; \
+      arm64) GOARCH=arm64 ;; \
+      *) GOARCH="" ;; \
+    esac && \
+    if [ -n "$GOARCH" ]; then \
+      curl -fsSL https://go.dev/dl/go${GOVERSION}.linux-${GOARCH}.tar.gz -o /tmp/go.tgz && \
+      tar -C /usr/local -xzf /tmp/go.tgz && \
+      rm -f /tmp/go.tgz && \
+      echo 'export PATH=/usr/local/go/bin:$PATH' > /etc/profile.d/go.sh ; \
+    else echo "Skipping Go install for arch: $arch" ; fi
+
+# Create non-root user
+RUN useradd -m -s /usr/bin/zsh dev && \
+    mkdir -p /work && chown -R dev:dev /work
+
+USER dev
+WORKDIR /work
+
+# Default: keep container alive for exec/shell
+CMD ["sleep", "infinity"]
+
