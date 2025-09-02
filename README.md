@@ -6,30 +6,22 @@ Built with a mix of pragmatic shell and as much AI assistance as is sane — all
 
 ## Quick Start
 
-- Clone the repo and review `config/Brewfile` and `setup/defaults.sh`.
-- Profiles are currently disabled to simplify core mechanics.
-- Preview & diff:
-  - `make plan` (dry‑run checks)
-  - `make diff` and `make diff-open`
+- Clone the repo and review `config/Brewfile`.
+- Install packages: `make brew`
+- Link dotfiles: `make apply-dotfiles`
 
 ## Profiles
 Profiles and overlays were removed to simplify the core plan/diff engine. We may reintroduce them later.
 
 ## What it does
 
-- Homebrew: installs via `brew bundle`
-- Defaults: applies macOS defaults
-- Dotfiles: stows `dotfiles/*`
-- Assistants: profile‑aware toggles (auto‑applies in profiles that enable it; override with `ASSISTANTS=0/1`)
-- Optional mise: multi‑language/tool manager that can pin Go/tooling and other CLIs, enabled by default in the `wip` profile
+- Homebrew: installs via `brew bundle` (from `config/Brewfile`)
+- Dotfiles: stows `dotfiles/*` into your home directory
 
 ## Commands
 
-- `make plan` — dry‑run checks (bundle check, stow preview)
-- `make apply` — apply brew bundle, defaults, dotfiles
-- `make diff` / `make diff-open` — snapshot + report
-- `make prune-snapshots KEEP=N` — preview prune; `make snapshots-clean KEEP=N` to apply
-- `make check` / `make test` — lint and tests (`FIX=1` to auto‑format)
+- `make brew` — install packages from `config/Brewfile`
+- `make apply-dotfiles` — link dotfiles with stow (idempotent)
 
 ## Repository Layout
 
@@ -37,11 +29,7 @@ Profiles and overlays were removed to simplify the core plan/diff engine. We may
   - `Brewfile`: Homebrew formulae/casks and MAS apps (source of truth)
 - `*.example` configs for tools (ssh, gpg-agent, starship, hidutil, etc.)
 - `dotfiles/` — Dotfile packages to be stowed into `$HOME`
-- `setup/` — macOS bootstrap scripts (temporary until Go CLI replaces)
-- `tools/` — thin orchestration + shared `lib.sh` helpers (entrypoint scripts)
-- Go CLI: planned future work to replace shell orchestration while keeping inputs under `config/`.
-- `tests/` — bats tests for scripts and defaults
-- `snapshots/` — artifacts: current/desired state and diffs
+- `setup/`, `tools/`, `tests/` — removed to simplify; focus on `config/` + `dotfiles/`
 - `docs/` — notes and procedures
 
 Top level stays minimal: a Makefile that delegates to `tools/` and eventually the Go CLI.
@@ -50,8 +38,7 @@ Top level stays minimal: a Makefile that delegates to `tools/` and eventually th
 
 - Inputs live under `config/` so we can evolve the engine without moving data.
 - Scripts are idempotent and safe; destructive actions require explicit flags.
-- `tools/lib.sh` centralizes logging, DRY‑RUN, and path resolution.
-- Environment knobs:
+- Environment knobs (optional):
   - `HS_BREWFILE`: override path to Brewfile (else `config/Brewfile`)
 - Makefile remains a thin entrypoint; the Go CLI will absorb orchestration over time while keeping the same UX (`plan`, `diff`, `apply`).
 

@@ -1,33 +1,33 @@
-# Bean custom plugin for organizing zsh config
-#
-# Layout:
-#   scripts/*.zsh   -> sourced on startup (aliases, env, helpers)
-#   functions/*     -> autoloadable functions (one file per function)
-#   completions/_*  -> completion definitions (optional)
+gsnb() {
+  if [ $# -eq 0 ]; then
+    display_error "Usage: gspnew <branch title sentence>"
+    return 1
+  fi
 
-plugin_root="${0:A:h}"
+  local title="$*"
 
-# Source script snippets
-scripts_dir="$plugin_root/scripts"
-if [[ -d "$scripts_dir" ]]; then
-  for f in "$scripts_dir"/*.zsh; do
-    [[ -r "$f" ]] && source "$f"
-  done
-fi
+  # Convert title → safe branch name
+  local branch_name
+  branch_name=$(echo "$title"     | tr '[:upper:]' '[:lower:]'     | sed -E 's/[^a-z]+/-/g; s/^-+|-+$//g')
 
-# Autoload functions (one function per file)
-func_dir="$plugin_root/functions"
-if [[ -d "$func_dir" ]]; then
-  fpath=($func_dir $fpath)
-  # Autoload every file name as a function
-  for f in "$func_dir"/*(.N:t); do
-    autoload -Uz "$f"
-  done
-fi
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || {
+    display_error "Not in a git repository."
+    return 1
+  }
 
-# Completions (optional): add directory to fpath so _files are found
-comp_dir="$plugin_root/completions"
-if [[ -d "$comp_dir" ]]; then
-  fpath=($comp_dir $fpath)
-fi
+  echo "📦 Creating branch '[32m$branch_name[0m' from '[36m$current_branch[0m' with git-spice..."
+  if ! gs branch create "$branch_name" -m "$title"; then
+    display_error "Failed to create branch with git-spice."
+    return 1
+  fi
 
+  # Set upstream to the branch we created from (local tracking)
+  if ! git branch --set-upstream-to="$current_branch" "$branch_name" >/dev/null 2>&1; then
+    display_error "Failed to set local upstream to '$current_branch'."
+    return 1
+  fi
+
+  echo "✅ [32mCreated branch '$branch_name' (title: "$title")[0m"
+  echo "🔗 [36mLocal upstream set to '$current_branch'[0m"
+}

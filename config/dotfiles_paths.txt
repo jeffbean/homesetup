@@ -6,9 +6,4 @@
 .gitconfig
 .gitignore_global
 .tmux.conf
-.p10k.zsh
-.config/karabiner/karabiner.json
-.config/kitty/kitty.conf
-.zsh/rc.d/dir_profiles
-.zsh/rc.d/terminal_status
 .oh-my-zsh/custom
