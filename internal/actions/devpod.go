@@ -41,15 +41,13 @@ func DevpodUp() error {
         slog.Error("docker run failed", slog.Any("err", err))
         return err
     }
-    // Copy homesetup binary if present and run apply inside
-    bin := filepath.Join("bin", "homesetup")
-    if fi, err := os.Stat(bin); err == nil && fi.Mode().Perm()&0100 != 0 {
-        _ = run("docker", "cp", bin, "devpod:/usr/local/bin/homesetup")
-        if err := run("docker", "exec", "-u", "dev", "-w", "/work", "devpod", "homesetup", "apply"); err != nil {
-            slog.Warn("homesetup apply inside devpod failed", slog.Any("err", err))
-        }
-    } else {
-        slog.Warn("homesetup binary not found; skipping apply", slog.String("path", bin))
+    // Build homesetup inside the container for correct OS/arch, then apply
+    buildCmd := "mkdir -p ~/.local/bin && (command -v go >/dev/null 2>&1 && go build -o ~/.local/bin/homesetup ./cmd/homesetup || echo 'Go not found in devpod; skipping build')"
+    if err := run("docker", "exec", "-u", "dev", "-w", "/work", "devpod", "bash", "-lc", buildCmd); err != nil {
+        slog.Warn("homesetup build inside devpod failed", slog.Any("err", err))
+    }
+    if err := run("docker", "exec", "-u", "dev", "-w", "/work", "devpod", "bash", "-lc", "~/.local/bin/homesetup apply || true"); err != nil {
+        slog.Warn("homesetup apply inside devpod failed", slog.Any("err", err))
     }
     slog.Info("devpod up", slog.String("workdir", cwd))
     return nil
@@ -69,4 +67,3 @@ func DevpodDown() error {
     slog.Info("devpod down")
     return nil
 }
-
