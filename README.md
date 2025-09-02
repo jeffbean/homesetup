@@ -22,6 +22,16 @@ Profiles and overlays were removed to simplify the core plan/diff engine. We may
 
 - `make brew` — install packages from `config/Brewfile`
 - `make apply-dotfiles` — link dotfiles with stow (idempotent)
+- `make apply` — stow + reload tmux (run `exec zsh -l` to reload your shell)
+
+### Optional Go CLI
+
+You can use the tiny Go CLI instead of Make targets:
+
+- `go run ./cmd/homesetup plan` — brew bundle check + stow preview (dry-run)
+- `go run ./cmd/homesetup brew` — install packages from `config/Brewfile`
+- `go run ./cmd/homesetup apply-dotfiles` — stow dotfiles
+- `go run ./cmd/homesetup apply` — stow + reload tmux
 
 ## Repository Layout
 
