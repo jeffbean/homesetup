@@ -9,7 +9,7 @@ import (
 )
 
 func usage() {
-    fmt.Println("homesetup <plan|apply|apply-dotfiles|brew|devpod up|shell|down>")
+    fmt.Println("homesetup <plan|apply|apply-dotfiles|brew>")
 }
 
 func main() {
@@ -34,22 +34,6 @@ func main() {
         err = actions.Apply()
     case "brew":
         err = actions.BrewInstall()
-    case "devpod":
-        args := fs.Args()
-        if len(args) == 0 {
-            usage()
-            return
-        }
-        switch args[0] {
-        case "up":
-            err = actions.DevpodUp()
-        case "shell":
-            err = actions.DevpodShell()
-        case "down":
-            err = actions.DevpodDown()
-        default:
-            usage()
-        }
     default:
         usage()
     }
