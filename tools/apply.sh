@@ -10,6 +10,13 @@ source "$REPO_ROOT/tools/lib.sh"
 
 log "Applying desired state…"
 bash "$REPO_ROOT/setup/bootstrap_macos.sh"
+
+# Optionally backup conflicting files before linking dotfiles
+if [[ "${BACKUP_CONFLICTS:-1}" != "0" ]]; then
+  log "Backing up conflicting files that would block stow…"
+  bash "$REPO_ROOT/tools/prepare_apply.sh" || true
+fi
+
 bash "$REPO_ROOT/tools/apply_dotfiles.sh"
 
 # Assistants install policy: apply only if ASSISTANTS=1

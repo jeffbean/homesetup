@@ -1,2 +1,3 @@
 # example_hello: print a friendly greeting
 print -r -- "Hello from bean plugin!"
+

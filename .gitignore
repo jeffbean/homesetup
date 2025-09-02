@@ -32,8 +32,12 @@ go.work.sum
 # .vscode/
 .DS_Store
 snapshots/
-\n+# Local Go build artifact
+
+# Local Go build artifact
 /homesetup
+
+# Ignore backup artifacts
+*.backup.*
 
 # Do not version the active profile file; it is managed at runtime
 dotfiles/**/.config/homesetup/profile.env

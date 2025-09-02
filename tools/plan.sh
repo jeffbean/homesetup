@@ -11,6 +11,10 @@ source "$REPO_ROOT/tools/lib.sh"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)"
 
+log "Preparing current and desired snapshots…"
+bash "$REPO_ROOT/tools/generate_desired.sh" > /tmp/homesetup.plan.desired.out 2>&1 || true
+bash "$REPO_ROOT/tools/snapshot_current.sh" > /tmp/homesetup.plan.snapshot.out 2>&1 || true
+
 log "Generating diff report (current vs desired)…"
 bash "$REPO_ROOT/tools/diff_state.sh" > /tmp/homesetup.plan.diff.out 2>&1 || true
 report_line=$(grep -Eo "Diff report written to: .*" /tmp/homesetup.plan.diff.out | tail -n1 || true)
@@ -21,51 +25,85 @@ else
 fi
 
 echo "---"
-log "Homebrew dry-run (brew bundle check)…"
-if command -v brew > /dev/null 2>&1; then
-  BF="$(brewfile_path)"
-  if [[ -f "$BF" ]]; then
-    brew bundle check --file="$BF" || true
+# Summarize concrete actions apply would take
+echo "---"
+log "Planned Actions"
+
+DIFF_DIR="$REPO_ROOT/snapshots/diff/latest"
+show_list() { # file title tag max
+  local f="$1"; local title="$2"; local tag="$3"; local max=${4:-20}
+  if [[ -s "$f" ]]; then
+    local cnt; cnt=$(wc -l < "$f" | tr -d ' ')
+    echo "- $title: $cnt"
+    local n=0
+    while IFS= read -r line; do
+      [[ -n "$line" ]] || continue
+      echo "  • $tag $line"
+      n=$((n+1)); [[ $n -ge $max ]] && break || true
+    done < "$f"
+    if (( cnt > n )); then echo "  • … (+$((cnt-n)) more)"; fi
   else
-    warn "Brewfile not found"
+    echo "- $title: 0"
   fi
-else
-  warn "Homebrew not installed; skipping bundle check"
-fi
+}
 
-echo "---"
-log "Dotfiles stow preview (no changes)…"
-if command -v stow > /dev/null 2>&1; then
-  if [[ -d "$REPO_ROOT/dotfiles" ]]; then
-    while IFS= read -r -d '' pkg; do
-      pkgname=$(basename "$pkg")
-      stow -nvt "$HOME" -d "$REPO_ROOT/dotfiles" "$pkgname" || true
-    done < <(find "$REPO_ROOT/dotfiles" -mindepth 1 -maxdepth 1 -type d -print0)
+show_defaults() { # issues.tsv
+  local f="$1"; local max=${2:-10}
+  if [[ -s "$f" ]]; then
+    local cnt; cnt=$(wc -l < "$f" | tr -d ' ')
+    echo "- Defaults to change: $cnt"
+    local n=0
+    while IFS=$'\t' read -r domain key current desired; do
+      [[ -n "$domain" ]] || continue
+      echo "  • [CHANGE] $domain $key: $current -> $desired"
+      n=$((n+1)); [[ $n -ge $max ]] && break || true
+    done < "$f"
+    if (( cnt > n )); then echo "  • … (+$((cnt-n)) more)"; fi
   else
-    warn "dotfiles/ directory not found"
+    echo "- Defaults to change: 0"
   fi
-else
-  warn "stow not installed (brew install stow)"
-fi
+}
+
+show_dotfiles() { # issues.tsv
+  local f="$1"; local max=${2:-20}
+  if [[ -s "$f" ]]; then
+    local cnt; cnt=$(wc -l < "$f" | tr -d ' ')
+    echo "- Dotfiles to link/fix: $cnt"
+    local n=0 conflicts=0 fixes=0 links=0
+    while IFS=$'\t' read -r target state pkg rel; do
+      [[ -n "$target" ]] || continue
+      local tag="[INFO]"
+      case "$state" in
+        missing) tag="[LINK]"; links=$((links+1));;
+        symlink_other) tag="[FIX]"; fixes=$((fixes+1));;
+        conflict_file|conflict_dir) tag="[CONFLICT]"; conflicts=$((conflicts+1));;
+        linked_ok) tag="[OK]";;
+      esac
+      if [[ "$tag" == "[LINK]" ]] || { [[ "$tag" == "[FIX]" ]] && [[ "${PLAN_SHOW_FIXES:-0}" == "1" ]]; } || { [[ "$tag" == "[CONFLICT]" ]] && [[ "${PLAN_SHOW_CONFLICTS:-0}" == "1" ]]; }; then
+        echo "  • $tag $target ($pkg/$rel): state=$state"
+        n=$((n+1)); [[ $n -ge $max ]] && break || true
+      fi
+    done < "$f"
+    if (( cnt > n )); then echo "  • … (+$((cnt-n)) more; adjust PLAN_SHOW_* and max)"; fi
+    echo "  • Summary (all states): links=$links fixes=$fixes conflicts=$conflicts"
+  else
+    echo "- Dotfiles to link/fix: 0"
+  fi
+}
+
+show_list "$DIFF_DIR/_brew_to_install.txt" "Brew formulae to install" "[INSTALL]"
+show_list "$DIFF_DIR/_casks_to_install.txt" "Casks to install" "[INSTALL]"
+show_list "$DIFF_DIR/_mas_to_install.txt" "MAS apps to install (ids)" "[INSTALL]"
+show_defaults "$DIFF_DIR/_defaults_issues.tsv"
+show_dotfiles "$DIFF_DIR/_dotfiles_issues.tsv"
 
 echo "---"
-log "Assistants status (Codex / Claude)…"
-if command -v codex > /dev/null 2>&1; then
-  echo "codex: installed ($("codex" --version 2> /dev/null || echo unknown))"
-else
-  echo "codex: not installed"
-fi
-if [[ -d "/Applications/Claude.app" || -d "$HOME/Applications/Claude.app" ]]; then
-  echo "claude: installed"
-else
-  echo "claude: not installed"
-fi
+echo "See full report: ${report_line#*: }"
 
-echo "---"
-log "Next steps"
-cat << 'NEXT'
-- Review the diff report above for package/defaults/dotfiles differences.
-- Run `make apply` to apply Homebrew bundle, macOS defaults, and link dotfiles.
-- Optional: `ASSISTANTS=1 make apply` to also install Codex + Claude.
-- Validate with `make test`.
-NEXT
+# If there are conflicts, suggest backing them up before apply
+if [[ -s "$DIFF_DIR/_dotfiles_issues.tsv" ]]; then
+  conflicts=$(grep -E $'\tconflict_(file|dir)\t' "$DIFF_DIR/_dotfiles_issues.tsv" | wc -l | tr -d ' ' || true)
+  if (( conflicts > 0 )); then
+    echo "Hint: run 'bash tools/prepare_apply.sh' before apply to safely backup conflicts."
+  fi
+fi

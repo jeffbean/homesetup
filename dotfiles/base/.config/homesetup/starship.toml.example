@@ -1,9 +1,0 @@
-# Place this at ~/.config/homesetup/starship.toml (stowed) to use with the profile loader
-
-add_newline = false
-format = "$all"
-
-[character]
-success_symbol = "➜"
-error_symbol = "✗"
-
