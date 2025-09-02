@@ -1,23 +1,11 @@
 package main
 
 import (
-    "flag"
-    "fmt"
-    "os"
-    "homesetup/internal/actions"
+	"flag"
+	"fmt"
+	"homesetup/internal/actions"
+	"os"
 )
-
-
-
-
-
-
-
-
-
-
-
-
 
 func usage() {
 	fmt.Println("homesetup <plan|apply|apply-dotfiles|brew>")

@@ -11,42 +11,24 @@ help:
 	@echo "  build           - Build Go CLI to ./bin/homesetup"
 
 brew:
-	@if command -v brew >/dev/null 2>&1; then \
-	  FILE=$${HS_BREWFILE:-config/Brewfile}; \
-	  if [ -f "$$FILE" ]; then brew bundle --file="$$FILE"; else echo "Brewfile not found: $$FILE"; fi; \
-	else echo "Homebrew not installed"; fi
+	@if [ -x bin/homesetup ]; then bin/homesetup brew; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup brew; \
+	else echo "Build CLI with 'make build' or install Go."; fi
 
 apply-dotfiles:
-	@if command -v stow >/dev/null 2>&1; then \
-	  if [ -d dotfiles ]; then \
-	    for pkg in dotfiles/*; do [ -d "$$pkg" ] || continue; echo "Stowing: $${pkg##*/}"; stow --no-folding -d dotfiles -vt "$$HOME" "$${pkg##*/}"; done; \
-	  else echo "dotfiles directory not found"; fi; \
-	else echo "stow not installed (brew install stow)"; fi
+	@if [ -x bin/homesetup ]; then bin/homesetup apply-dotfiles; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup apply-dotfiles; \
+	else echo "Build CLI with 'make build' or install Go."; fi
 
-apply: apply-dotfiles
-	@# Reload tmux config for any running server
-	@if command -v tmux >/dev/null 2>&1; then \
-	  tmux source-file "$$HOME/.tmux.conf" >/dev/null 2>&1 || true; \
-	fi
-	@echo "[+] Dotfiles stowed. If your prompt or plugins changed, run: exec zsh -l"
+apply:
+	@if [ -x bin/homesetup ]; then bin/homesetup apply; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup apply; \
+	else echo "Build CLI with 'make build' or install Go."; fi
 
 plan:
-	@echo "[+] Homebrew dry-run (bundle check)"
-	@if command -v brew >/dev/null 2>&1; then \
-	  FILE=$${HS_BREWFILE:-config/Brewfile}; \
-	  if [ -f "$$FILE" ]; then brew bundle check --file="$$FILE" || true; else echo "Brewfile not found: $$FILE"; fi; \
-	else echo "Homebrew not installed"; fi
-
-	@echo "---"
-	@echo "[+] Dotfiles stow preview (no changes)"
-	@if command -v stow >/dev/null 2>&1; then \
-	  if [ -d dotfiles ]; then \
-	    for pkg in dotfiles/*; do \
-	      [ -d "$$pkg" ] || continue; pkgname=$${pkg##*/}; echo "Preview: $$pkgname"; \
-	      stow -nvt "$$HOME" -d dotfiles "$$pkgname" || true; \
-	    done; \
-	  else echo "dotfiles directory not found"; fi; \
-	else echo "stow not installed (brew install stow)"; fi
+	@if [ -x bin/homesetup ]; then bin/homesetup plan; \
+	elif command -v go >/dev/null 2>&1; then go run ./cmd/homesetup plan; \
+	else echo "Build CLI with 'make build' or install Go."; fi
 
 build:
 	@mkdir -p bin
